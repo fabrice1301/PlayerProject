@@ -25,7 +25,7 @@ public class PlayerProjectApplication extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/MainView.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/CatalogView.fxml"));
         loader.setControllerFactory(context::getBean);
         Parent root=loader.load();
         stage.setTitle("Player Project");
