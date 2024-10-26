@@ -2,6 +2,7 @@ package eafc.peruwelz.PlayerProject.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -27,7 +28,7 @@ public class TGenre {
     private String genreName;
 
     @Column(columnDefinition = "tinyint", length = 1)
-    private Boolean genreDeleted;
+    private Boolean genreDeleted=false;
 
     @ManyToMany(mappedBy = "trackGenreList")
     private Set<TTrack> genreTrackList;

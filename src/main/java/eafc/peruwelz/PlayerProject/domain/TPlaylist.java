@@ -32,7 +32,7 @@ public class TPlaylist {
     private Integer playlistCount;
 
     @Column(columnDefinition = "tinyint", length = 1)
-    private Boolean playlistDeleted;
+    private Boolean playlistDeleted=false;
 
     @ManyToMany
     @JoinTable(

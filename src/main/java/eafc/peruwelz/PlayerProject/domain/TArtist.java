@@ -30,7 +30,7 @@ public class TArtist {
     private String artistPicture;
 
     @Column(columnDefinition = "tinyint", length = 1)
-    private Boolean artistDeleted;
+    private Boolean artistDeleted=false;
 
     @ManyToMany(mappedBy = "trackArtistList")
     private Set<TTrack> artistTrackList;

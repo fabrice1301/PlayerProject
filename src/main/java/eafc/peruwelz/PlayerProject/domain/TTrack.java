@@ -1,17 +1,12 @@
 package eafc.peruwelz.PlayerProject.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import javafx.util.Duration;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
@@ -40,12 +35,18 @@ public class TTrack {
     private LocalDate trackDate;
 
     @Column(columnDefinition = "tinyint", length = 1)
-    private Boolean trackDeleted;
+    private Boolean trackDeleted=false;
 
-    @ManyToMany(mappedBy = "playlistTrackList")
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "Tplaylisttrack",
+            joinColumns = @JoinColumn(name = "trackId"),
+            inverseJoinColumns = @JoinColumn(name = "playlistId")
+    )
     private Set<TPlaylist> trackPlaylistList;
 
-    @ManyToMany
+
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "Ttrackartist",
             joinColumns = @JoinColumn(name = "trackId"),
@@ -53,7 +54,7 @@ public class TTrack {
     )
     private Set<TArtist> trackArtistList;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "Ttrackalbum",
             joinColumns = @JoinColumn(name = "trackId"),
@@ -61,16 +62,13 @@ public class TTrack {
     )
     private Set<TAlbum> trackAlbumList;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "Ttrackgenre",
             joinColumns = @JoinColumn(name = "trackId"),
             inverseJoinColumns = @JoinColumn(name = "genreId")
     )
     private Set<TGenre> trackGenreList;
-
-
-
 
     public Long getTrackId() {
         return trackId;
@@ -160,6 +158,36 @@ public class TTrack {
         this.trackGenreList = trackGenreList;
     }
 
+    public String getTrackGenresAsString() {
+        if (trackGenreList == null || trackGenreList.isEmpty()) {
+            return "";
+        }
+        return trackGenreList.stream() //On transforme trackGenreList en un flux de données
+                .map(TGenre::getGenreName) // On récupère le nom de chaque TGenre
+                .collect(Collectors.joining(", ")); //On concatène les noms avec une virgule et un espace entre eux
+    }
 
+    public String getTrackArtistsAsString() {
+        if (trackArtistList == null || trackArtistList.isEmpty()) {
+            return "";
+        }
+        return trackArtistList.stream() //On transforme trackGenreList en un flux de données
+                .map(TArtist::getArtistName) // On récupère le nom de chaque TGenre
+                .collect(Collectors.joining(", ")); //On concatène les noms avec une virgule et un espace entre eux
+    }
 
+    public String getTrackAlbumsAsString() {
+        if (trackAlbumList == null || trackAlbumList.isEmpty()) {
+            return "";
+        }
+        return trackAlbumList.stream() //On transforme trackGenreList en un flux de données
+                .map(TAlbum::getAlbumName) // On récupère le nom de chaque TGenre
+                .collect(Collectors.joining(", ")); //On concatène les noms avec une virgule et un espace entre eux
+    }
+
+    public String getTrackTimeFormat() {
+        int minutes = trackTime / 60;
+        int seconds = trackTime % 60;
+        return String.format("%02d:%02d", minutes, seconds);
+    }
 }

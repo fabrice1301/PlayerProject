@@ -34,7 +34,7 @@ public class TAlbum {
     private LocalDate albumDate;
 
     @Column(columnDefinition = "tinyint", length = 1)
-    private Boolean albumDeleted;
+    private Boolean albumDeleted=false;
 
     @ManyToMany(mappedBy = "trackAlbumList")
     private Set<TTrack> albumTrackList;

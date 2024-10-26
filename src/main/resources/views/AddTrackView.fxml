@@ -28,7 +28,7 @@
             <HBox alignment="CENTER_LEFT" prefHeight="42.0" prefWidth="844.0">
                <children>
                   <Label text="Emplacement :" />
-                  <TextField fx:id="trackNameField" prefWidth="300.0">
+                  <TextField fx:id="trackPathField" editable="false" prefWidth="300.0">
                      <HBox.margin>
                         <Insets left="30.0" />
                      </HBox.margin>
@@ -49,16 +49,11 @@
             <HBox alignment="CENTER_LEFT" prefHeight="54.0" prefWidth="844.0">
                <children>
                   <Label text="Titre de la piste :" />
-                  <TextField prefWidth="300.0">
+                  <TextField fx:id="trackTitleField" prefWidth="300.0">
                      <HBox.margin>
                         <Insets left="20.0" />
                      </HBox.margin>
                   </TextField>
-                  <Button contentDisplay="CENTER" mnemonicParsing="false" prefWidth="30.0" text="+">
-                     <HBox.margin>
-                        <Insets left="20.0" />
-                     </HBox.margin>
-                  </Button>
                </children>
                <padding>
                   <Insets left="20.0" />
@@ -81,7 +76,7 @@
                         <Label text="Ajouter une pochette" />
                      </children>
                   </HBox>
-                  <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="trackPicture" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../images/Pochette.jpg" />
                      </image>
@@ -99,8 +94,8 @@
                               <Insets right="10.0" />
                            </HBox.margin>
                         </ImageView>
-                        <TextField />
-                        <Button fx:id="searchPictureTrackBtn" contentDisplay="CENTER" mnemonicParsing="false">
+                        <TextField fx:id="trackPathPictureField" />
+                        <Button fx:id="searchPictureTrackBtn" contentDisplay="CENTER" mnemonicParsing="false" onAction="#searchPictureTrackEvent">
                            <HBox.margin>
                               <Insets left="10.0" />
                            </HBox.margin>
@@ -188,10 +183,10 @@
                   </HBox>
                   <HBox alignment="CENTER" prefHeight="238.0" prefWidth="499.0">
                      <children>
-                        <TableView prefHeight="200.0" prefWidth="200.0">
+                        <TableView fx:id="playlistTableView" editable="true" prefHeight="200.0" prefWidth="200.0">
                           <columns>
-                            <TableColumn minWidth="30.0" prefWidth="30.0" resizable="false" />
-                            <TableColumn prefWidth="75.0" text="Playlist" />
+                            <TableColumn fx:id="selectedPlaylistCol" minWidth="30.0" prefWidth="30.0" resizable="false" />
+                            <TableColumn fx:id="playlistNameCol" prefWidth="75.0" text="Playlist" />
                           </columns>
                            <columnResizePolicy>
                               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -200,10 +195,10 @@
                               <Insets right="20.0" />
                            </HBox.margin>
                         </TableView>
-                        <TableView editable="true" prefHeight="200.0" prefWidth="200.0">
+                        <TableView fx:id="albumTableView" editable="true" prefHeight="200.0" prefWidth="200.0">
                           <columns>
-                            <TableColumn minWidth="30.0" prefWidth="30.0" resizable="false" />
-                            <TableColumn prefWidth="75.0" text="Album" />
+                            <TableColumn fx:id="selectedAlbumCol" minWidth="30.0" prefWidth="30.0" resizable="false" />
+                            <TableColumn fx:id="albumNameCol" prefWidth="75.0" text="Album" />
                           </columns>
                            <HBox.margin>
                               <Insets left="20.0" />
@@ -227,7 +222,7 @@
                               <Insets right="20.0" />
                            </HBox.margin>
                            <children>
-                              <TextField fx:id="genreNameField1">
+                              <TextField fx:id="playlistNameField">
                                  <HBox.margin>
                                     <Insets top="5.0" />
                                  </HBox.margin>
@@ -247,7 +242,7 @@
                               <Insets left="20.0" />
                            </HBox.margin>
                            <children>
-                              <TextField fx:id="genreNameField2">
+                              <TextField fx:id="albumNameField">
                                  <HBox.margin>
                                     <Insets top="5.0" />
                                  </HBox.margin>

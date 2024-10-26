@@ -1,15 +1,13 @@
 package eafc.peruwelz.PlayerProject.ctrl;
 
-import eafc.peruwelz.PlayerProject.domain.TArtist;
-import eafc.peruwelz.PlayerProject.domain.TGenre;
-import eafc.peruwelz.PlayerProject.domain.TTrack;
+import eafc.peruwelz.PlayerProject.domain.*;
 
 import eafc.peruwelz.PlayerProject.Class.Catalog;
+import eafc.peruwelz.PlayerProject.modelControl.AlbumModelSelection;
 import eafc.peruwelz.PlayerProject.modelControl.ArtistModelSelection;
 import eafc.peruwelz.PlayerProject.modelControl.GenreModelSelection;
-import eafc.peruwelz.PlayerProject.service.ArtistService;
-import eafc.peruwelz.PlayerProject.service.GenreService;
-import eafc.peruwelz.PlayerProject.service.TrackService;
+import eafc.peruwelz.PlayerProject.modelControl.PlaylistModelSelection;
+import eafc.peruwelz.PlayerProject.service.*;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -19,6 +17,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.control.Button;
@@ -30,12 +30,10 @@ import org.tritonus.share.sampled.file.TAudioFileFormat;
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Controller
 public class AddTrackController {
@@ -43,11 +41,17 @@ public class AddTrackController {
     private TTrack track;
     private TGenre genre;
     private TArtist artist;
+    private TPlaylist playlist;
+    private TAlbum album;
     private TrackService trackService;
     private GenreService genreService;
     private ArtistService artistService;
+    private PlaylistService playlistService;
+    private AlbumService albumService;
     private Catalog catalog;
     private File file;
+    private File picture;
+    private String trackPathPicture;
 
     @FXML
     private Button cancelBtn;
@@ -59,13 +63,28 @@ public class AddTrackController {
     private Button searchPictureTrackBtn;
 
     @FXML
-    private TextField trackNameField;
+    private TextField trackPathField;
+
+    @FXML
+    private TextField trackTitleField;
+
+    @FXML
+    private TextField trackPathPictureField;
+
+    @FXML
+    private ImageView trackPicture;
 
     @FXML
     private TextField genreNameField;
 
     @FXML
     private TextField artistNameField;
+
+    @FXML
+    private TextField playlistNameField;
+
+    @FXML
+    private TextField albumNameField;
 
     @FXML
     private TableView<GenreModelSelection> genreTableView;
@@ -86,22 +105,48 @@ public class AddTrackController {
     private ObservableList<ArtistModelSelection> dataArtistTable;
 
     @FXML
+    private TableView<PlaylistModelSelection> playlistTableView;
+
+    @FXML
+    private ObservableList<AlbumModelSelection> dataAlbumTable;
+
+    @FXML
+    private TableView<AlbumModelSelection> albumTableView;
+
+    @FXML
+    private ObservableList<PlaylistModelSelection> dataPlaylistTable;
+
+    @FXML
     private TableColumn<ArtistModelSelection, Boolean> selectedArtistCol;
 
     @FXML
     private TableColumn<ArtistModelSelection, String> artistNameCol;
 
+    @FXML
+    private TableColumn<PlaylistModelSelection, Boolean> selectedPlaylistCol;
+
+    @FXML
+    private TableColumn<PlaylistModelSelection, String> playlistNameCol;
+
+    @FXML
+    private TableColumn<ArtistModelSelection, Boolean> selectedAlbumCol;
+
+    @FXML
+    private TableColumn<AlbumModelSelection, String> albumNameCol;
+
     @Autowired
-    public AddTrackController(TrackService trackService, Catalog catalog, GenreService genreService, ArtistService artistService){
+    public AddTrackController(TrackService trackService, Catalog catalog, GenreService genreService, ArtistService artistService, PlaylistService playlistService, AlbumService albumService){
         this.trackService=trackService;
         this.genreService=genreService;
         this.artistService=artistService;
+        this.playlistService=playlistService;
+        this.albumService=albumService;
         this.catalog = catalog;
     }
 
     @FXML
     private void initialize(){
-        //Ajoute de la loupe dans les boutons de recherche
+        //Ajoute la loupe dans les boutons de recherche
         searchTrackBtn.setText("\uD83D\uDD0D " + searchTrackBtn.getText());
         searchPictureTrackBtn.setText("\uD83D\uDD0D " + searchPictureTrackBtn.getText());
 
@@ -129,6 +174,30 @@ public class AddTrackController {
         }
         artistTableView.setItems(dataArtistTable);
 
+        //Gestion des playlists
+        this.selectedPlaylistCol.setCellValueFactory(new PropertyValueFactory<>("selected"));
+        this.selectedPlaylistCol.setCellFactory(tc -> new CheckBoxTableCell<>());
+        this.playlistNameCol.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getPlaylist().getPlaylistName()));
+        List<TPlaylist> listPlaylist = playlistService.findAllPlaylistService();
+        dataPlaylistTable = FXCollections.observableArrayList();
+        for (TPlaylist playlist : listPlaylist) {
+            dataPlaylistTable.add(new PlaylistModelSelection(playlist, false));
+        }
+        playlistTableView.setItems(dataPlaylistTable);
+
+        //Gestion des albums
+        this.selectedAlbumCol.setCellValueFactory(new PropertyValueFactory<>("selected"));
+        this.selectedAlbumCol.setCellFactory(tc -> new CheckBoxTableCell<>());
+        this.albumNameCol.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getAlbum().getAlbumName()));
+        List<TAlbum> listAlbum = albumService.findAllAlbumService();
+        dataAlbumTable = FXCollections.observableArrayList();
+        for (TAlbum album : listAlbum) {
+            dataAlbumTable.add(new AlbumModelSelection(album, false));
+        }
+        albumTableView.setItems(dataAlbumTable);
+
     }
 
     @FXML
@@ -146,7 +215,8 @@ public class AddTrackController {
 
         // Si un fichier est sélectionné, mettre à jour l'interface
         if (this.file != null) {
-            trackNameField.setText(this.file.getName());
+            trackPathField.setText(this.file.getName());
+            trackTitleField.setText(extensionLess(this.file.getName()));
         }
     }
 
@@ -154,8 +224,14 @@ public class AddTrackController {
     private void saveTrackEvent() throws UnsupportedAudioFileException, IOException {
         track=new TTrack();
 
-        //On récupère le nom du fichier sans l'extension
-        this.track.setTrackTitle(extensionLess(this.file.getName()));
+        //On vérifie qu'un titre a été renseigné
+        if (Objects.equals(trackTitleField.getText(), "")) {
+            //On récupère le nom du fichier sans l'extension
+            this.track.setTrackTitle(extensionLess(this.file.getName()));
+        }
+        else{
+            this.track.setTrackTitle(this.trackTitleField.getText());
+        }
 
         //On récupère le chemin du fichier
         this.track.setTrackPath(file.getAbsolutePath());
@@ -180,9 +256,24 @@ public class AddTrackController {
         dataArtistTable.forEach(hsl -> {if (hsl.isSelected()) artistSelected.add(hsl.getArtist());});
         track.setTrackArtistList(artistSelected);
 
+        //On récupère les playlists sélectionnées
+        Set<TPlaylist> playlistSelected = new HashSet<>();
+        dataPlaylistTable.forEach(hsl -> {if (hsl.isSelected()) playlistSelected.add(hsl.getPlaylist());});
+        track.setTrackPlaylistList(playlistSelected);
+        System.out.println(playlistSelected);
+
+        //On récupère les albums sélectionnés
+        Set<TAlbum> albumSelected = new HashSet<>();
+        dataAlbumTable.forEach(hsl -> {if (hsl.isSelected()) albumSelected.add(hsl.getAlbum());});
+        track.setTrackAlbumList(albumSelected);
+
+        //On récupère l'adresse de la pochette si elle existe
+        if (this.trackPathPicture!=null) track.setTrackPicture(this.trackPathPicture);
+
         //On sauve la piste avec ses propriétés
         this.trackService.saveTrackService(this.track);
         this.catalog.addTrack(this.track);
+        CancelEvent();
     }
 
     private String extensionLess(String name){
@@ -205,7 +296,7 @@ public class AddTrackController {
     private void AddGenreEvent(){
         genre=new TGenre();
         genre.setGenreName(genreNameField.getText());
-        genre.setGenreDeleted(false);
+        //genre.setGenreDeleted(false);
         genreService.saveGenreService(genre);
         dataGenreTable.add(new GenreModelSelection(genre, false));
     }
@@ -214,18 +305,47 @@ public class AddTrackController {
     private void AddArtistEvent(){
         artist=new TArtist();
         artist.setArtistName(artistNameField.getText());
-        artist.setArtistDeleted(false);
+        //artist.setArtistDeleted(false);
         artistService.saveArtistService(artist);
         dataArtistTable.add(new ArtistModelSelection(artist, false));
     }
 
     @FXML
     private void AddPlaylistEvent(){
-
+        playlist=new TPlaylist();
+        playlist.setPlaylistName(playlistNameField.getText());
+        //playlist.setPlaylistDeleted(false);
+        playlistService.savePlaylistService(playlist);
+        dataPlaylistTable.add(new PlaylistModelSelection(playlist, false));
     }
 
     @FXML
     private void AddAlbumEvent(){
+        album=new TAlbum();
+        album.setAlbumName(albumNameField.getText());
+        //album.setAlbumDeleted(false);
+        albumService.saveAlbumService(album);
+        dataAlbumTable.add(new AlbumModelSelection(album, false));
+    }
 
+    @FXML
+    private void searchPictureTrackEvent(){
+        // Créer un FileChooser
+        FileChooser fileChooser = new FileChooser();
+
+        // Configurer les filtres pour les fichiers MP3 uniquement
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Fichiers JPG (*.jpg)", "*.jpg");
+        fileChooser.getExtensionFilters().add(extFilter);
+
+        // Ouvrir la boîte de dialogue pour sélectionner un fichier
+        this.picture = fileChooser.showOpenDialog(new Stage());
+
+        // Si un fichier est sélectionné, mettre à jour l'interface
+        if (this.picture != null) {
+            this.trackPathPictureField.setText(this.picture.getName());
+            this.trackPathPicture=this.picture.toURI().toString();
+            Image image = new Image(this.trackPathPicture);
+            trackPicture.setImage(image);
+        }
     }
 }
