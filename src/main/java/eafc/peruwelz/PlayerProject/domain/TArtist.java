@@ -7,10 +7,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
-import java.time.OffsetDateTime;
+
+import java.util.Objects;
 import java.util.Set;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
@@ -21,7 +21,7 @@ public class TArtist {
     @Id
     @Column(nullable = false, updatable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long artistId;
 
     @Column
     private String artistName;
@@ -36,12 +36,12 @@ public class TArtist {
     private Set<TTrack> artistTrackList;
 
 
-    public Long getId() {
-        return id;
+    public Long getArtistId() {
+        return artistId;
     }
 
-    public void setId(final Long id) {
-        this.id = id;
+    public void setArtistId(final Long artistId) {
+        this.artistId = artistId;
     }
 
     public String getArtistName() {
@@ -76,6 +76,17 @@ public class TArtist {
         this.artistTrackList = artistTrackList;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TArtist artist)) return false;
+        return Objects.equals(getArtistId(), artist.getArtistId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getArtistId());
+    }
 
 
 }

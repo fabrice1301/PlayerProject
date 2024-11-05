@@ -10,10 +10,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import java.time.OffsetDateTime;
+import java.util.Objects;
 import java.util.Set;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Entity
@@ -75,6 +77,7 @@ public class TPlaylist {
         this.playlistDeleted = playlistDeleted;
     }
 
+    @Transactional(readOnly = true)
     public Set<TTrack> getPlaylistTrackList() {
         return playlistTrackList;
     }
@@ -83,5 +86,15 @@ public class TPlaylist {
         this.playlistTrackList = playlistTrackList;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TPlaylist playlist)) return false;
+        return Objects.equals(getPlaylistId(), playlist.getPlaylistId());
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(getPlaylistId());
+    }
 }

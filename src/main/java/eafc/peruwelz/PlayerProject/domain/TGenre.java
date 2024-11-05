@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import java.time.OffsetDateTime;
+import java.util.Objects;
 import java.util.Set;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -66,5 +67,15 @@ public class TGenre {
         this.genreTrackList = genreTrackList;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TGenre genre)) return false;
+        return Objects.equals(getGenreId(), genre.getGenreId());
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(getGenreId());
+    }
 }

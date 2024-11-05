@@ -13,16 +13,13 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.tritonus.share.sampled.file.TAudioFileFormat;
@@ -39,6 +36,7 @@ import java.util.*;
 public class AddTrackController {
 
     private TTrack track;
+    private TTrack trackToModify;
     private TGenre genre;
     private TArtist artist;
     private TPlaylist playlist;
@@ -52,6 +50,10 @@ public class AddTrackController {
     private File file;
     private File picture;
     private String trackPathPicture;
+    private Boolean update=false;
+
+    @FXML
+    private DatePicker dateTrack;
 
     @FXML
     private Button cancelBtn;
@@ -146,9 +148,12 @@ public class AddTrackController {
 
     @FXML
     private void initialize(){
+
+        trackToModify=new TTrack();
         //Ajoute la loupe dans les boutons de recherche
         searchTrackBtn.setText("\uD83D\uDD0D " + searchTrackBtn.getText());
         searchPictureTrackBtn.setText("\uD83D\uDD0D " + searchPictureTrackBtn.getText());
+
 
         //Gestion des genres
         this.selectedGenreCol.setCellValueFactory(new PropertyValueFactory<>("selected"));
@@ -200,6 +205,43 @@ public class AddTrackController {
 
     }
 
+
+    public void setTrackToModify(TTrack track, Boolean update){
+        if (track != null){
+            this.update=update;
+            trackToModify=track;
+            trackPathField.setText(this.trackToModify.getTrackPath());
+            trackTitleField.setText(this.trackToModify.getTrackTitle());
+            dateTrack.setValue(this.trackToModify.getTrackDate());
+            //trackPathPictureField.setText(this.trackToModify.getTrackPicture());
+            if (trackToModify.getTrackPicture()!=null){
+                trackPathPicture=this.trackToModify.getTrackPicture();
+                Image image=new Image(trackPathPicture);
+                trackPicture.setImage(image);
+            }
+
+            Set<TGenre> listGenre=this.trackToModify.getTrackGenreList();
+            for (GenreModelSelection genre : dataGenreTable){
+                genre.setSelected(listGenre.contains(genre.getGenre()));
+            }
+
+            Set<TArtist> listArtist=this.trackToModify.getTrackArtistList();
+            for (ArtistModelSelection artist : dataArtistTable){
+                artist.setSelected(listArtist.contains(artist.getArtist()));
+            }
+
+            Set<TAlbum> listAlbum=this.trackToModify.getTrackAlbumList();
+            for (AlbumModelSelection album : dataAlbumTable){
+                album.setSelected(listAlbum.contains(album.getAlbum()));
+            }
+
+            Set<TPlaylist> listPlaylist=this.trackToModify.getTrackPlaylistList();
+            for (PlaylistModelSelection playlist : dataPlaylistTable){
+                playlist.setSelected(listPlaylist.contains(playlist.getPlaylist()));
+            }
+        }
+    }
+
     @FXML
     private void searchTrackEvent() {
 
@@ -223,6 +265,7 @@ public class AddTrackController {
     @FXML
     private void saveTrackEvent() throws UnsupportedAudioFileException, IOException {
         track=new TTrack();
+        if (this.trackToModify!=null) track=this.trackToModify;
 
         //On vérifie qu'un titre a été renseigné
         if (Objects.equals(trackTitleField.getText(), "")) {
@@ -234,18 +277,20 @@ public class AddTrackController {
         }
 
         //On récupère le chemin du fichier
-        this.track.setTrackPath(file.getAbsolutePath());
-
-        AudioFileFormat formatFile = AudioSystem.getAudioFileFormat(file);
-        if (formatFile instanceof TAudioFileFormat) {
-            // Récupérer les propriétés du fichier
-            Map<?, ?> propriete = ((TAudioFileFormat) formatFile).properties();
-            // Obtenir la durée en microsecondes
-            Long timeMicroSecondes = (Long) propriete.get("duration");
-            // Convertir la durée en secondes
-            int time = (int) (timeMicroSecondes / 1000000);
-            this.track.setTrackTime(time);
+        if (this.file!=null) {
+            this.track.setTrackPath(file.getAbsolutePath());
+            AudioFileFormat formatFile = AudioSystem.getAudioFileFormat(file);
+            if (formatFile instanceof TAudioFileFormat) {
+                // Récupérer les propriétés du fichier
+                Map<?, ?> propriete = ((TAudioFileFormat) formatFile).properties();
+                // Obtenir la durée en microsecondes
+                Long timeMicroSecondes = (Long) propriete.get("duration");
+                // Convertir la durée en secondes
+                int time = (int) (timeMicroSecondes / 1000000);
+                this.track.setTrackTime(time);
+            }
         }
+
         //On récupère les genres sélectionnés
         Set<TGenre> genreSelected = new HashSet<>();
         dataGenreTable.forEach(hsl -> {if (hsl.isSelected()) genreSelected.add(hsl.getGenre());});
@@ -260,7 +305,6 @@ public class AddTrackController {
         Set<TPlaylist> playlistSelected = new HashSet<>();
         dataPlaylistTable.forEach(hsl -> {if (hsl.isSelected()) playlistSelected.add(hsl.getPlaylist());});
         track.setTrackPlaylistList(playlistSelected);
-        System.out.println(playlistSelected);
 
         //On récupère les albums sélectionnés
         Set<TAlbum> albumSelected = new HashSet<>();
@@ -270,11 +314,17 @@ public class AddTrackController {
         //On récupère l'adresse de la pochette si elle existe
         if (this.trackPathPicture!=null) track.setTrackPicture(this.trackPathPicture);
 
+        if (this.dateTrack!=null) track.setTrackDate(this.dateTrack.getValue());
+
         //On sauve la piste avec ses propriétés
         this.trackService.saveTrackService(this.track);
-        this.catalog.addTrack(this.track);
+        
+        if (!this.update) this.catalog.addTrack(this.track);
+        else this.catalog.modifyTrack(catalog.getIndex(track),track);
+
         CancelEvent();
     }
+
 
     private String extensionLess(String name){
 
@@ -305,7 +355,6 @@ public class AddTrackController {
     private void AddArtistEvent(){
         artist=new TArtist();
         artist.setArtistName(artistNameField.getText());
-        //artist.setArtistDeleted(false);
         artistService.saveArtistService(artist);
         dataArtistTable.add(new ArtistModelSelection(artist, false));
     }
@@ -314,7 +363,6 @@ public class AddTrackController {
     private void AddPlaylistEvent(){
         playlist=new TPlaylist();
         playlist.setPlaylistName(playlistNameField.getText());
-        //playlist.setPlaylistDeleted(false);
         playlistService.savePlaylistService(playlist);
         dataPlaylistTable.add(new PlaylistModelSelection(playlist, false));
     }
@@ -347,5 +395,9 @@ public class AddTrackController {
             Image image = new Image(this.trackPathPicture);
             trackPicture.setImage(image);
         }
+    }
+
+    public void setUpdate(Boolean update){
+        this.update=update;
     }
 }

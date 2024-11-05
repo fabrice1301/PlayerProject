@@ -34,6 +34,9 @@ public class TTrack {
     @Column
     private LocalDate trackDate;
 
+    @Column
+    private Integer trackCount;
+
     @Column(columnDefinition = "tinyint", length = 1)
     private Boolean trackDeleted=false;
 
@@ -50,7 +53,7 @@ public class TTrack {
     @JoinTable(
             name = "Ttrackartist",
             joinColumns = @JoinColumn(name = "trackId"),
-            inverseJoinColumns = @JoinColumn(name = "id")
+            inverseJoinColumns = @JoinColumn(name = "artistId")
     )
     private Set<TArtist> trackArtistList;
 
@@ -69,6 +72,14 @@ public class TTrack {
             inverseJoinColumns = @JoinColumn(name = "genreId")
     )
     private Set<TGenre> trackGenreList;
+
+    @ManyToMany
+    @JoinTable(
+            name = "Ttracklisten",
+            joinColumns = @JoinColumn(name = "trackId"),
+            inverseJoinColumns = @JoinColumn(name = "listenId")
+    )
+    private Set<TListen> trackListenList;
 
     public Long getTrackId() {
         return trackId;
@@ -118,6 +129,14 @@ public class TTrack {
         this.trackDate = trackDate;
     }
 
+    public Integer getTrackCount() {
+        return trackCount;
+    }
+
+    public void setTrackCount(final Integer trackCount) {
+        this.trackCount = trackCount;
+    }
+
     public Boolean getTrackDeleted() {
         return trackDeleted;
     }
@@ -158,12 +177,20 @@ public class TTrack {
         this.trackGenreList = trackGenreList;
     }
 
+    public Set<TListen> getTrackListenList() {
+        return trackListenList;
+    }
+
+    public void setTrackListenList(final Set<TListen> trackListenList) {
+        this.trackListenList = trackListenList;
+    }
+
     public String getTrackGenresAsString() {
         if (trackGenreList == null || trackGenreList.isEmpty()) {
             return "";
         }
         return trackGenreList.stream() //On transforme trackGenreList en un flux de données
-                .map(TGenre::getGenreName) // On récupère le nom de chaque TGenre
+                .map(genre -> genre.getGenreName()) // On récupère le nom de chaque TGenre
                 .collect(Collectors.joining(", ")); //On concatène les noms avec une virgule et un espace entre eux
     }
 
@@ -172,7 +199,7 @@ public class TTrack {
             return "";
         }
         return trackArtistList.stream() //On transforme trackGenreList en un flux de données
-                .map(TArtist::getArtistName) // On récupère le nom de chaque TGenre
+                .map(artist -> artist.getArtistName()) // On récupère le nom de chaque TGenre
                 .collect(Collectors.joining(", ")); //On concatène les noms avec une virgule et un espace entre eux
     }
 
@@ -181,7 +208,16 @@ public class TTrack {
             return "";
         }
         return trackAlbumList.stream() //On transforme trackGenreList en un flux de données
-                .map(TAlbum::getAlbumName) // On récupère le nom de chaque TGenre
+                .map(album -> album.getAlbumName()) // On récupère le nom de chaque TGenre
+                .collect(Collectors.joining(", ")); //On concatène les noms avec une virgule et un espace entre eux
+    }
+
+    public String getTrackPlaylistsAsString() {
+        if (trackPlaylistList == null || trackPlaylistList.isEmpty()) {
+            return "";
+        }
+        return trackPlaylistList.stream() //On transforme trackGenreList en un flux de données
+                .map(playlist -> playlist.getPlaylistName()) // On récupère le nom de chaque TGenre
                 .collect(Collectors.joining(", ")); //On concatène les noms avec une virgule et un espace entre eux
     }
 
@@ -190,4 +226,5 @@ public class TTrack {
         int seconds = trackTime % 60;
         return String.format("%02d:%02d", minutes, seconds);
     }
+
 }

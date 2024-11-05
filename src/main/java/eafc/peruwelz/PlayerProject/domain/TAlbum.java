@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Objects;
 import java.util.Set;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -88,5 +89,15 @@ public class TAlbum {
         this.albumTrackList = albumTrackList;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TAlbum album)) return false;
+        return Objects.equals(getAlbumId(), album.getAlbumId());
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(getAlbumId());
+    }
 }

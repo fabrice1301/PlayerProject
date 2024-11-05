@@ -29,7 +29,7 @@ public class PlayerProjectApplication extends Application {
         loader.setControllerFactory(context::getBean);
         Parent root=loader.load();
         stage.setTitle("Player Project");
-        stage.setScene(new Scene(root,900,700));
+        stage.setScene(new Scene(root));
         stage.show();
         stage.setOnCloseRequest((Event -> Platform.exit()));
     }

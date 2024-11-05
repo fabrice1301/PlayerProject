@@ -4,29 +4,31 @@ import eafc.peruwelz.PlayerProject.domain.TTrack;
 import eafc.peruwelz.PlayerProject.service.TrackService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
-@Service
+@Component
 public class Catalog {
 
-    private TrackService trackService;
     private ObservableList<TTrack> dataCatalogTable;
 
-    @Autowired
-    public Catalog(TrackService trackService){
-        this.trackService=trackService;
-    }
-
-    public ObservableList<TTrack> reloadCatalogTableView(){
-        List<TTrack> trackList=this.trackService.findAllTrackService();
-        this.dataCatalogTable = FXCollections.observableArrayList(trackList);
+    public ObservableList<TTrack> reloadCatalogTableView(List<TTrack> listTrack){
+        this.dataCatalogTable = FXCollections.observableArrayList(
+                listTrack.stream().sorted(Comparator.comparing(TTrack::getTrackTitle)).collect(Collectors.toList())
+        );
         return this.dataCatalogTable;
     }
 
     public void addTrack(TTrack track) {
         dataCatalogTable.add(track);
+    }
+
+    public void modifyTrack(int index,TTrack track){ dataCatalogTable.set(index,track);}
+
+    public int getIndex(TTrack track){
+        return dataCatalogTable.indexOf(track);
     }
 }
