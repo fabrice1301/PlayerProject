@@ -1,8 +1,8 @@
 package eafc.peruwelz.PlayerProject.ctrl;
 
 
-import eafc.peruwelz.PlayerProject.domain.*;
 import eafc.peruwelz.PlayerProject.Class.Catalog;
+import eafc.peruwelz.PlayerProject.domain.*;
 import eafc.peruwelz.PlayerProject.service.*;
 import javafx.animation.AnimationTimer;
 import javafx.collections.FXCollections;
@@ -15,20 +15,19 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
-
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Controller
@@ -41,28 +40,30 @@ public class CatalogController {
     private TTrack trackSelected;
     private MediaPlayer mediaPlayer;
     private AnimationTimer timer; // Pour mettre à jour le Slider
-    private Boolean muteStatus=false;
-    private Integer index=-1;
-    private Double volume=0.5;
-    private String playlistFilter=null;
-    private String genreFilter=null;
-    private String artistFilter=null;
-    private String albumFilter=null;
-    private String textFilter=null;
+    private Boolean muteStatus = false;
+    private Integer index = -1;
+    private Double volume = 0.5;
+    private String playlistFilter = null;
+    private String genreFilter = null;
+    private String artistFilter = null;
+    private String albumFilter = null;
+    private String textFilter = null;
 
     //@Autowired
-    private TrackService trackService;
+    private final TrackService trackService;
     //@Autowired
-    private GenreService genreService;
+    private final GenreService genreService;
     //@Autowired
-    private ArtistService artistService;
+    private final ArtistService artistService;
     //@Autowired
-    private PlaylistService playlistService;
+    private final PlaylistService playlistService;
     //@Autowired
-    private AlbumService albumService;
+    private final AlbumService albumService;
     //@Autowired
-    private Catalog catalog;
-    private enum Actions {PLAY, STOP};
+    private final Catalog catalog;
+
+    private enum Actions {PLAY, STOP}
+
     private Actions act;
     private Boolean randomState = false;
     private Boolean reloadState = false;
@@ -174,27 +175,27 @@ public class CatalogController {
 
 
     @Autowired
-    public CatalogController(TrackService trackService, GenreService genreService, ArtistService artistService, PlaylistService playlistService, AlbumService albumService, Catalog catalog){
-        this.trackService=trackService;
-        this.genreService=genreService;
-        this.artistService=artistService;
-        this.playlistService=playlistService;
-        this.albumService=albumService;
-        this.catalog=catalog;
+    public CatalogController(TrackService trackService, GenreService genreService, ArtistService artistService, PlaylistService playlistService, AlbumService albumService, Catalog catalog) {
+        this.trackService = trackService;
+        this.genreService = genreService;
+        this.artistService = artistService;
+        this.playlistService = playlistService;
+        this.albumService = albumService;
+        this.catalog = catalog;
     }
 
     @FXML
-    private void initialize(){
+    private void initialize() {
         //On récupère l'image de la pochette vide
-        initialPictureTrack =new Image(pictureTrack.getImage().getUrl());
+        initialPictureTrack = new Image(pictureTrack.getImage().getUrl());
         setupCatalogTableView();
         setupFilter();
     }
 
     @FXML
-    private void deleteTrackEvent(){
-        this.track=catalogTableView.getSelectionModel().getSelectedItem();
-        if (this.index==catalog.getIndex(this.track)){
+    private void deleteTrackEvent() {
+        this.track = catalogTableView.getSelectionModel().getSelectedItem();
+        if (this.index == catalog.getIndex(this.track)) {
             StopEvent();
             initPlayZone();
         }
@@ -224,7 +225,7 @@ public class CatalogController {
         loader.setControllerFactory(context::getBean);
         Parent root = loader.load();
         AddTrackController controller = loader.getController();
-        controller.setTrackToModify(catalogTableView.getSelectionModel().getSelectedItem(),true);
+        controller.setTrackToModify(catalogTableView.getSelectionModel().getSelectedItem(), true);
         Stage stage = new Stage();
         stage.setTitle("Ajouter une piste");
         stage.setScene(new Scene(root));
@@ -234,15 +235,15 @@ public class CatalogController {
     }
 
     @FXML
-    private void selectTrackTableView(){
-        if (catalogTableView.getSelectionModel().getSelectedItem()!=null){
+    private void selectTrackTableView() {
+        if (catalogTableView.getSelectionModel().getSelectedItem() != null) {
             //On récupère la piste sélectionnée dans le catalogue
-            int newIndex=catalogTableView.getSelectionModel().getSelectedIndex();
-            if (newIndex!=-1) this.index=newIndex;
-            this.index=catalogTableView.getSelectionModel().getSelectedIndex();
-            if (mediaPlayer!=null) mediaPlayer.stop();
+            int newIndex = catalogTableView.getSelectionModel().getSelectedIndex();
+            if (newIndex != -1) this.index = newIndex;
+            this.index = catalogTableView.getSelectionModel().getSelectedIndex();
+            if (mediaPlayer != null) mediaPlayer.stop();
             loadTrack(this.index);
-            if (act==Actions.PLAY){
+            if (act == Actions.PLAY) {
                 mediaPlayer.play();
             }
         }
@@ -250,26 +251,25 @@ public class CatalogController {
     }
 
     @FXML
-    private void PlayEvent(){
+    private void PlayEvent() {
 
         if (mediaPlayer != null) {
             if (mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING) {
                 mediaPlayer.pause();
-                this.act=Actions.STOP;
-            }
-            else{
+                this.act = Actions.STOP;
+            } else {
                 mediaPlayer.play();
-                this.act=Actions.PLAY;
+                this.act = Actions.PLAY;
             }
             switchPictureBtnPlay();
         }
     }
 
     @FXML
-    private void StopEvent(){
+    private void StopEvent() {
         if (mediaPlayer != null) {
             mediaPlayer.stop();
-            this.act=Actions.STOP;
+            this.act = Actions.STOP;
             timer.stop(); // Arrêter le timer
             audioSlider.setValue(0); // Réinitialiser le Slider
             String imagePath = getClass().getResource("/images/play.png").toExternalForm();
@@ -293,24 +293,24 @@ public class CatalogController {
     }
 
     @FXML
-    private void VolumeSliderChange(){
+    private void VolumeSliderChange() {
         mediaPlayer.setVolume(volumeSlider.getValue());
-        if (volumeSlider.getValue()!=0){
+        if (volumeSlider.getValue() != 0) {
             String imagePath = getClass().getResource("/images/volume.png").toExternalForm();
             Image image = new Image(imagePath);
             volumePicture.setImage(image);
-            muteStatus=false;
-        }else{
+            muteStatus = false;
+        } else {
             String imagePath = getClass().getResource("/images/mute.png").toExternalForm();
             Image image = new Image(imagePath);
             volumePicture.setImage(image);
-            muteStatus=true;
+            muteStatus = true;
         }
-        volume=volumeSlider.getValue();
+        volume = volumeSlider.getValue();
     }
 
     @FXML
-    private void MuteVolumeChange(){
+    private void MuteVolumeChange() {
         if (!muteStatus) {
             volume = volumeSlider.getValue();
             mediaPlayer.setVolume(0);
@@ -319,25 +319,23 @@ public class CatalogController {
             Image image = new Image(imagePath);
             volumePicture.setImage(image);
             muteStatus = true;
-        }
-        else if (muteStatus && volume>0){
+        } else if (muteStatus && volume > 0) {
             mediaPlayer.setVolume(volume);
             volumeSlider.setValue(volume);
             String imagePath = getClass().getResource("/images/volume.png").toExternalForm();
             Image image = new Image(imagePath);
             volumePicture.setImage(image);
-            muteStatus=false;
+            muteStatus = false;
         }
     }
 
-    private void switchPictureBtnPlay(){
+    private void switchPictureBtnPlay() {
         if (mediaPlayer != null) {
             if (mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING) {
                 String imagePath = getClass().getResource("/images/play.png").toExternalForm();
                 Image image = new Image(imagePath);
                 picturePlayBtn.setImage(image);
-            }
-            else{
+            } else {
                 String imagePath = getClass().getResource("/images/pause.png").toExternalForm();
                 Image image = new Image(imagePath);
                 picturePlayBtn.setImage(image);
@@ -346,58 +344,58 @@ public class CatalogController {
     }
 
     @FXML
-    private void PreviousEvent(){
-        if (mediaPlayer!=null) mediaPlayer.stop();
-        this.index-=1;
+    private void PreviousEvent() {
+        if (mediaPlayer != null) mediaPlayer.stop();
+        this.index -= 1;
         loadTrack(this.index);
-        if (act==Actions.PLAY){
+        if (act == Actions.PLAY) {
             mediaPlayer.play();
         }
     }
 
     @FXML
-    private void NextEvent(){
-        if (mediaPlayer!=null) mediaPlayer.stop();
+    private void NextEvent() {
+        if (mediaPlayer != null) mediaPlayer.stop();
         if (!reloadState && !randomState) {
-            if (this.index<catalogTableView.getItems().size()-1) this.index+=1;
+            if (this.index < catalogTableView.getItems().size() - 1) this.index += 1;
             else {
                 StopEvent();
             }
         }
-        if (randomState){
-            Boolean flag=true;
-            int totalTrack=catalogTableView.getItems().size();
+        if (randomState) {
+            Boolean flag = true;
+            int totalTrack = catalogTableView.getItems().size();
             Random random = new Random();
-            while (flag){
-                int newIndex=random.nextInt(totalTrack);
-                if (this.index != newIndex){
-                    this.index=newIndex;
-                    flag=false;
+            while (flag) {
+                int newIndex = random.nextInt(totalTrack);
+                if (this.index != newIndex) {
+                    this.index = newIndex;
+                    flag = false;
                 }
             }
         }
         loadTrack(this.index);
-        if (act==Actions.PLAY){
+        if (act == Actions.PLAY) {
             mediaPlayer.play();
         }
     }
 
-    private void verifIndex(){
-        int countTrack=catalogTableView.getItems().size();
+    private void verifIndex() {
+        int countTrack = catalogTableView.getItems().size();
         previousBtn.setDisable(false);
         nextBtn.setDisable(false);
-        if (index==0){
+        if (index == 0) {
             previousBtn.setDisable(true);
         }
-        if (index==countTrack-1){
+        if (index == countTrack - 1) {
             nextBtn.setDisable(true);
         }
     }
 
-    private void loadTrack(int index){
+    private void loadTrack(int index) {
         catalogTableView.getSelectionModel().select(index);
-        this.trackSelected=catalogTableView.getSelectionModel().getSelectedItem();
-        this.index=catalogTableView.getSelectionModel().getSelectedIndex();
+        this.trackSelected = catalogTableView.getSelectionModel().getSelectedItem();
+        this.index = catalogTableView.getSelectionModel().getSelectedIndex();
         verifIndex();
         if (this.trackSelected.getTrackPath() != null) {
             playZone.setDisable(false);
@@ -431,39 +429,38 @@ public class CatalogController {
         if (this.trackSelected.getTrackPicture() != null) {
             Image image = new Image(this.trackSelected.getTrackPicture());
             pictureTrack.setImage(image);
-        }
-        else{
+        } else {
             //Si pas de pochette on remet la pochette vide
             pictureTrack.setImage(initialPictureTrack);
         }
     }
 
     @FXML
-    private void RandomEvent(){
+    private void RandomEvent() {
         if (randomState) randomBtn.setStyle("");
         else randomBtn.setStyle("-fx-background-color: #3498db; -fx-text-fill: white;");
-        randomState=!randomState;
+        randomState = !randomState;
 
         reloadBtn.setStyle("");
-        reloadState=false;
+        reloadState = false;
     }
 
     @FXML
-    private void againEvent(){
+    private void againEvent() {
         if (reloadState) reloadBtn.setStyle("");
         else reloadBtn.setStyle("-fx-background-color: #3498db; -fx-text-fill: white;");
-        reloadState=!reloadState;
+        reloadState = !reloadState;
 
         randomBtn.setStyle("");
-        randomState=false;
+        randomState = false;
     }
 
 
-    private void reloadFilter(){
-        if (genreComboBox.getSelectionModel().getSelectedIndex()==0) genreFilter=null;
-        if (albumComboBox.getSelectionModel().getSelectedIndex()==0) albumFilter=null;
-        if (playlistComboBox.getSelectionModel().getSelectedIndex()==0) playlistFilter=null;
-        if (artistComboBox.getSelectionModel().getSelectedIndex()==0) artistFilter=null;
+    private void reloadFilter() {
+        if (genreComboBox.getSelectionModel().getSelectedIndex() == 0) genreFilter = null;
+        if (albumComboBox.getSelectionModel().getSelectedIndex() == 0) albumFilter = null;
+        if (playlistComboBox.getSelectionModel().getSelectedIndex() == 0) playlistFilter = null;
+        if (artistComboBox.getSelectionModel().getSelectedIndex() == 0) artistFilter = null;
         List<TTrack> allTracks = trackService.findAllTrackService();
         List<TTrack> filteredTracks = allTracks.stream()
                 .filter(track -> {
@@ -471,15 +468,15 @@ public class CatalogController {
                     boolean matchesAlbum = albumFilter == null || track.getTrackAlbumsAsString().contains(albumFilter);
                     boolean matchesGenre = genreFilter == null || track.getTrackGenresAsString().contains(genreFilter);
                     boolean matchesPlaylist = playlistFilter == null || track.getTrackPlaylistsAsString().contains(playlistFilter);
-                    boolean matchesSearchField = textFilter == null || track.getTrackTitle().toLowerCase().contains(textFilter.toLowerCase())  || track.getTrackArtistsAsString().toLowerCase().contains(textFilter.toLowerCase()) || track.getTrackAlbumsAsString().toLowerCase().contains(textFilter.toLowerCase());
-                    return  matchesPlaylist && matchesGenre && matchesAlbum && matchesArtist && matchesSearchField;
+                    boolean matchesSearchField = textFilter == null || track.getTrackTitle().toLowerCase().contains(textFilter.toLowerCase()) || track.getTrackArtistsAsString().toLowerCase().contains(textFilter.toLowerCase()) || track.getTrackAlbumsAsString().toLowerCase().contains(textFilter.toLowerCase());
+                    return matchesPlaylist && matchesGenre && matchesAlbum && matchesArtist && matchesSearchField;
                 })
                 .collect(Collectors.toList());
         dataCatalogTable = catalog.reloadCatalogTableView(filteredTracks);
         catalogTableView.setItems(dataCatalogTable);
     }
 
-    private void initPlayZone(){
+    private void initPlayZone() {
         playZone.setDisable(true);
         pictureTrack.setImage(initialPictureTrack);
         titleLabel.setText(null);
@@ -499,7 +496,7 @@ public class CatalogController {
 
         playlistComboBox.setItems(dataPlaylist);
         playlistComboBox.getItems().add(0, "Toutes les playlists");
-        if (playlistFilter==null) playlistComboBox.getSelectionModel().select(0);
+        if (playlistFilter == null) playlistComboBox.getSelectionModel().select(0);
     }
 
     @FXML
@@ -514,7 +511,7 @@ public class CatalogController {
         );
         genreComboBox.setItems(dataGenre);
         genreComboBox.getItems().add(0, "Tous les genres");
-        if (genreFilter==null) genreComboBox.getSelectionModel().select(0);
+        if (genreFilter == null) genreComboBox.getSelectionModel().select(0);
 
     }
 
@@ -530,7 +527,7 @@ public class CatalogController {
         );
         artistComboBox.setItems(dataArtist);
         artistComboBox.getItems().add(0, "Tous les artistes");
-        if (artistFilter==null) artistComboBox.getSelectionModel().select(0);
+        if (artistFilter == null) artistComboBox.getSelectionModel().select(0);
     }
 
     @FXML
@@ -545,10 +542,10 @@ public class CatalogController {
         );
         albumComboBox.setItems(dataAlbum);
         albumComboBox.getItems().add(0, "Tous les albums");
-        if (albumFilter==null) albumComboBox.getSelectionModel().select(0);
+        if (albumFilter == null) albumComboBox.getSelectionModel().select(0);
     }
 
-    private void setupCatalogTableView(){
+    private void setupCatalogTableView() {
         this.titleColCatalogTableView.setCellValueFactory(new PropertyValueFactory<>("trackTitle"));
         this.timeColCatalogTableView.setCellValueFactory(new PropertyValueFactory<>("trackTimeFormat"));
         this.genreColCatalogTableView.setCellValueFactory(new PropertyValueFactory<>("trackGenresAsString"));
@@ -556,23 +553,23 @@ public class CatalogController {
         this.albumColCatalogTableView.setCellValueFactory(new PropertyValueFactory<>("trackAlbumsAsString"));
         this.playlistColCatalogTableView.setCellValueFactory(new PropertyValueFactory<>("trackPlaylistsAsString"));
 
-        List<TTrack> trackList=this.trackService.findAllTrackService();
-        dataCatalogTable=this.catalog.reloadCatalogTableView(trackList);
+        List<TTrack> trackList = this.trackService.findAllTrackService();
+        dataCatalogTable = this.catalog.reloadCatalogTableView(trackList);
         catalogTableView.setItems(dataCatalogTable);
 
         catalogTableView.getSelectionModel().selectedItemProperty().addListener((observable, oldIndex, newIndex) -> {
-            if (newIndex==null){
+            if (newIndex == null) {
                 modifyTrackBtn.setDisable(true);
                 deleteTrackBtn.setDisable(true);
                 initPlayZone();
-            }else{
+            } else {
                 modifyTrackBtn.setDisable(false);
                 deleteTrackBtn.setDisable(false);
             }
         });
     }
 
-    private void setupFilter(){
+    private void setupFilter() {
         reloadPlaylistFilter();
         reloadAlbumFilter();
         reloadArtistFilter();
@@ -586,15 +583,15 @@ public class CatalogController {
         // Ajout d'un listener pour la ComboBox des genres
         genreComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null && !newValue.toString().equals(genreFilter)) {
-                genreFilter=newValue.toString();
+                genreFilter = newValue.toString();
                 reloadFilter();
             }
         });
 
         // Ajout d'un listener pour la ComboBox des playlists
         playlistComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null && !newValue.toString().equals(playlistFilter) ) {
-                playlistFilter=newValue.toString();
+            if (newValue != null && !newValue.toString().equals(playlistFilter)) {
+                playlistFilter = newValue.toString();
                 reloadFilter();
             }
         });
@@ -602,7 +599,7 @@ public class CatalogController {
         // Ajout d'un listener pour la ComboBox des artistes
         artistComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null && !newValue.toString().equals(artistFilter)) {
-                artistFilter=newValue.toString();
+                artistFilter = newValue.toString();
                 reloadFilter(); // Appel de la méthode de filtrage
             }
         });
@@ -610,7 +607,7 @@ public class CatalogController {
         // Ajout d'un listener pour la ComboBox des albums
         albumComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null && !newValue.toString().equals(albumFilter)) {
-                albumFilter=newValue.toString();
+                albumFilter = newValue.toString();
                 reloadFilter(); // Appel de la méthode de filtrage
             }
         });

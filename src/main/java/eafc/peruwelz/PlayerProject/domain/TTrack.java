@@ -73,13 +73,9 @@ public class TTrack {
     )
     private Set<TGenre> trackGenreList;
 
-    @ManyToMany
-    @JoinTable(
-            name = "Ttracklisten",
-            joinColumns = @JoinColumn(name = "trackId"),
-            inverseJoinColumns = @JoinColumn(name = "listenId")
-    )
-    private Set<TListen> trackListenList;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "track_listen_list_id")
+    private TListen trackListenList;
 
     public Long getTrackId() {
         return trackId;
@@ -177,11 +173,11 @@ public class TTrack {
         this.trackGenreList = trackGenreList;
     }
 
-    public Set<TListen> getTrackListenList() {
+    public TListen getTrackListenList() {
         return trackListenList;
     }
 
-    public void setTrackListenList(final Set<TListen> trackListenList) {
+    public void setTrackListenList(final TListen trackListenList) {
         this.trackListenList = trackListenList;
     }
 
