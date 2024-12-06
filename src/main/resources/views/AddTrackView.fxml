@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="808.0" prefWidth="961.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eafc.peruwelz.PlayerProject.ctrl.AddTrackController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="808.0" prefWidth="961.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eafc.peruwelz.playerproject.ctrl.AddTrackController">
    <children>
       <HBox alignment="CENTER" prefHeight="30.0" prefWidth="962.0" />
       <VBox prefHeight="142.0" prefWidth="962.0">
@@ -71,7 +71,7 @@
                   </HBox>
                   <ImageView fx:id="trackPicture" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../images/Pochette.jpg" />
+                        <Image url="@../images/vide.jpg" />
                      </image>
                      <VBox.margin>
                         <Insets top="10.0" />

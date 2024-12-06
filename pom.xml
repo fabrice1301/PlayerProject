@@ -9,7 +9,7 @@
         <relativePath /><!-- lookup parent from repository -->
     </parent>
     <groupId>eafc.peruwelz</groupId>
-    <artifactId>miniprojet</artifactId>
+    <artifactId>PlayerProject</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>miniprojet</name>
 
