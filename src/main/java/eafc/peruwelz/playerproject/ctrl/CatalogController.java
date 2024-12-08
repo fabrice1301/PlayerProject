@@ -3,6 +3,7 @@ package eafc.peruwelz.playerproject.ctrl;
 
 import eafc.peruwelz.playerproject.Class.Catalog;
 import eafc.peruwelz.playerproject.Class.Filter;
+import eafc.peruwelz.playerproject.Class.StatusPlayer;
 import eafc.peruwelz.playerproject.command.*;
 import eafc.peruwelz.playerproject.domain.*;
 import eafc.peruwelz.playerproject.player.Player;
@@ -32,6 +33,7 @@ import org.springframework.stereotype.Controller;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
@@ -63,8 +65,8 @@ public class CatalogController {
     private String artistFilter = null;
     private String albumFilter = null;
     private String textFilter = null;
-
     private enum STATUS {PLAYING, STOPPED, PAUSED}
+    private StatusPlayer status;
     private Boolean randomState = false;
     private Boolean reloadState = false;
     private String style1 = "-fx-background-color: #c5fca9; -fx-text-fill: black;";
@@ -200,6 +202,7 @@ public class CatalogController {
         this.getTotalDurationCommand =new GetTotalDurationCommand(this.player);
         this.getVolumeCommand=new GetVolumeCommand(this.player);
         this.getPlayerCommand=new GetPlayerCommand(this.player);
+        this.status=new StatusPlayer();
 
         //On récupère l'image de la pochette vide
         initialPictureTrack = new Image(pictureTrack.getImage().getUrl());
@@ -255,7 +258,6 @@ public class CatalogController {
         }
         catch (Exception e){
             System.out.println(e.getMessage());
-
         }
     }
 
@@ -277,7 +279,6 @@ public class CatalogController {
         int index = catalogTableView.getSelectionModel().getSelectedIndex();
         int countSelected = catalogTableView.getSelectionModel().getSelectedItems().size();
         TTrack track;
-        System.out.println(index);
         AddListenedTrackListMenu.setDisable(false);
         modifyTrackMenu.setDisable(false);
         if (index == -1) {
@@ -307,11 +308,13 @@ public class CatalogController {
     @FXML
     private void PlayEvent() {
         if (this.remote.setCommand(getPlayerCommand).execute() != null) {
-            if (this.remote.setCommand(getStatusCommand).execute() == STATUS.PLAYING) {
+            if (Objects.equals(this.status.getStatus(), STATUS.PLAYING.toString())) {
                 this.remote.setCommand(pauseCommand).execute();
+                this.status.setStatus(STATUS.PAUSED.toString());
                 timer.stop();
             } else {
                 this.remote.setCommand(playCommand).execute();
+                this.status.setStatus(STATUS.PLAYING.toString());
                 timer.start();
             }
             switchPictureBtnPlay();
@@ -323,6 +326,7 @@ public class CatalogController {
         if (this.remote.setCommand(getPlayerCommand).execute() != null) {
             timer.stop();
             this.remote.setCommand(stopCommand).execute();
+            this.status.setStatus(STATUS.STOPPED.toString());
             timer.stop(); // Arrêter le timer
             seekSlider.setValue(0); // Réinitialiser le Slider
             String imagePath = getClass().getResource("/images/play.png").toExternalForm();
@@ -336,17 +340,8 @@ public class CatalogController {
     private void handleSliderChange() {
         if (this.remote.setCommand(getPlayerCommand).execute() != null) {
             remote.setCommand(new SeekCommand(this.player,Duration.seconds(seekSlider.getValue()))).execute();
-            //mediaPlayer.seek(Duration.seconds(audioSlider.getValue()));
         }
     }
-    /*
-    private String formatDuration(Duration duration) {
-        long minutes = (long) duration.toMinutes();
-        long seconds = (long) duration.toSeconds() % 60;
-        return String.format("%02d:%02d", minutes, seconds);
-    }
-
-     */
 
     private String formatDuration(double duration) {
         int minutes = (int) duration / 60;
@@ -357,7 +352,6 @@ public class CatalogController {
     @FXML
     private void VolumeSliderChange() {
         this.remote.setCommand(new SetVolumeCommand(this.player,volumeSlider.getValue())).execute();
-        //mediaPlayer.setVolume(volumeSlider.getValue());
         if (volumeSlider.getValue() != 0) {
             String imagePath = getClass().getResource("/images/volume.png").toExternalForm();
             Image image = new Image(imagePath);
@@ -378,7 +372,6 @@ public class CatalogController {
             if (!muteStatus) {
                 volume = volumeSlider.getValue();
                 this.remote.setCommand(new SetVolumeCommand(this.player,0)).execute();
-                //mediaPlayer.setVolume(0);
                 volumeSlider.setValue(0);
                 String imagePath = getClass().getResource("/images/mute.png").toExternalForm();
                 Image image = new Image(imagePath);
@@ -386,7 +379,6 @@ public class CatalogController {
                 muteStatus = true;
             } else if (muteStatus && volume > 0) {
                 this.remote.setCommand(new SetVolumeCommand(this.player,volume)).execute();
-                //mediaPlayer.setVolume(volume);
                 volumeSlider.setValue(volume);
                 String imagePath = getClass().getResource("/images/volume.png").toExternalForm();
                 Image image = new Image(imagePath);
@@ -397,8 +389,9 @@ public class CatalogController {
     }
 
     private void switchPictureBtnPlay() {
-        if (this.remote.setCommand(getPlayerCommand).execute() != null) {
-            if (this.remote.setCommand(getStatusCommand).execute() == STATUS.PLAYING) {
+
+        if (this.remote.setCommand(getStatusCommand).execute() != null) {
+            if (this.status.getStatus().equals(STATUS.PLAYING.toString())) {
                 String imagePath = getClass().getResource("/images/play.png").toExternalForm();
                 Image image = new Image(imagePath);
                 picturePlayBtn.setImage(image);
@@ -413,17 +406,15 @@ public class CatalogController {
     @FXML
     private void PreviousEvent() {
         TTrack newTrack;
-        String status;
+        String previousStatus;
         if (this.remote.setCommand(getPlayerCommand).execute() != null) {
-            status=this.remote.setCommand(getStatusCommand).execute().toString();
+            previousStatus= this.status.getStatus();
             if ((Double) this.remote.setCommand(getCurrentTimeCommand).execute() < 3 && this.index>0) this.index -= 1;
-            //if (mediaPlayer.getCurrentTime().toSeconds() < 3 && this.index>0) this.index -= 1;
             this.remote.setCommand(stopCommand).execute();
             newTrack = dataWaitingTrackList.get(this.index);
             loadTrack(newTrack);
-            if (status == STATUS.PLAYING.toString()) {
+            if (previousStatus == STATUS.PLAYING.toString()) {
                 this.remote.setCommand(playCommand).execute();
-                //mediaPlayer.play();
             }
         }
     }
@@ -437,22 +428,21 @@ public class CatalogController {
     private void NextEvent(Boolean btn) {
 
         TTrack newTrack;
-        int index = waitingTrackListView.getItems().indexOf(this.TrackLoaded);
+        int index=this.index;
         int countTrack = waitingTrackListView.getItems().size();
-        String status= this.remote.setCommand(getStatusCommand).execute().toString();
+        String previousStatus= this.status.getStatus();
+
         if (!btn){
             TrackLoaded.setTrackCount(TrackLoaded.getTrackCount()+1);
             trackService.saveTrackService(TrackLoaded);
         }
         if (countTrack > 1) {
-
             int oldindex=index;
             if (this.remote.setCommand(getPlayerCommand).execute() != null) {
                 this.remote.setCommand(stopCommand).execute();
                 initPlayZone();
             }
             if (btn && !reloadState && !randomState) index += 1;
-            //if (!reloadState && !randomState && index == countTrack - 1 && !btn) index = 0;
             if (!reloadState && !btn) {
                 if (index<countTrack-1) index++;
                 else index=0;
@@ -473,7 +463,7 @@ public class CatalogController {
         newTrack = dataWaitingTrackList.get(index);
         loadTrack(newTrack);
 
-        if (status == STATUS.PLAYING.toString()) {
+        if (Objects.equals(previousStatus, STATUS.PLAYING.toString()) || !btn) {
             this.remote.setCommand(playCommand).execute();
         }
         updateListViewStyle();
@@ -585,44 +575,6 @@ public class CatalogController {
 
 
     private void setupFilter() {
-        /*
-        // Ajout d'un listener pour la ComboBox des genres
-        genreComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null && !newValue.toString().equals(genreFilter)) {
-                filter.setGenreFilter(newValue.toString());
-                dataCatalogTable.setAll(filter.reload());
-            }
-        });
-
-        // Ajout d'un listener pour la ComboBox des playlists
-        playlistComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null && !newValue.toString().equals(playlistFilter)) {
-                filter.setPlaylistFilter(newValue.toString());
-                dataCatalogTable.setAll(filter.reload());
-            }
-        });
-
-        // Ajout d'un listener pour la ComboBox des artistes
-        artistComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null && !newValue.toString().equals(artistFilter)) {
-                filter.setArtistFilter(newValue.toString());
-                dataCatalogTable.setAll(filter.reload());
-            }
-        });
-
-        // Ajout d'un listener pour la ComboBox des albums
-        albumComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null && !newValue.toString().equals(albumFilter)) {
-                filter.setAlbumFilter(newValue.toString());
-                dataCatalogTable.setAll(filter.reload());
-            }
-        });
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            textFilter = newValue;
-            dataCatalogTable.setAll(filter.reload());
-        });
-
-         */
         dataCatalogTable.setAll(filter.setup());
     }
 
@@ -635,7 +587,6 @@ public class CatalogController {
                 track.setTrackWaiting(true);
                 trackService.saveTrackService(track);
             }
-
         }
         nextBtn.setDisable(false);
     }
@@ -667,11 +618,9 @@ public class CatalogController {
             //On récupère la piste sélectionnée dans le catalogue
             if (newIndex != -1) this.index = newIndex;
             newTrack = dataWaitingTrackList.get(this.index);
-
-            //if (this.player!=null && this.remote.setCommand(getStatusCommand).execute() != STATUS.PLAYING) this.remote.setCommand(stopCommand).execute();
             loadTrack(newTrack);
             PlayEvent();
-            //System.out.println(this.remote.setCommand(getStatusCommand).execute());
+
         }
     }
 
@@ -686,14 +635,8 @@ public class CatalogController {
             titleLabel.setText(TrackLoaded.getTrackTitle());
 
             String audioFilePath = this.TrackLoaded.getTrackPath();
-
-            //File file=new File(audioFilePath);
-            //Media media = new Media(file.toURI().toString());
-            //mediaPlayer = new MediaPlayer(media);
             this.remote.setCommand(new LoadTrackCommand(this.player,audioFilePath)).execute();
-            //player.loadTrack(media);
             remote.setCommand(new SetVolumeCommand(player,0.5)).execute();
-            //mediaPlayer.setVolume(volumeSlider.getValue());
             remote.setCommand(new SetOnReadyCommand(this.player,() -> {
                 seekSlider.setMax(player.getTotalDuration().toSeconds());
                 currentTime.setText("00:00 / " + formatDuration((Double) remote.setCommand(getTotalDurationCommand).execute()));
@@ -706,41 +649,10 @@ public class CatalogController {
                     currentTime.setText(formatDuration((Double) remote.setCommand(getCurrentTimeCommand).execute()) + " / " + formatDuration((Double) remote.setCommand(getTotalDurationCommand).execute()));
                 }
             };
-            /*
-            mediaPlayer.setOnReady(() -> {
-                audioSlider.setMax(mediaPlayer.getTotalDuration().toSeconds());
-                currentTime.setText("00:00 / " + formatDuration(mediaPlayer.getTotalDuration()));
-            });
-
-             */
 
             remote.setCommand(new SetOnEndOfMediaCommand(this.player,() -> {
                 NextEvent(false);
             })).execute();
-
-
-
-
-            /*
-            mediaPlayer.setOnEndOfMedia(() -> {
-                NextEvent(false); // On passe à la piste suivante à la fin de la lecture
-            });
-
-             */
-            // Initialiser le Slider
-            /*
-            timer = new AnimationTimer() {
-                @Override
-                public void handle(long now) {
-                    if (mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING) {
-                        audioSlider.setValue(mediaPlayer.getCurrentTime().toSeconds());
-                        currentTime.setText("00:00 / " + formatDuration((Double) remote.setCommand(getTotalDurationCommand).execute()));
-                        //currentTime.setText(formatDuration(Duration.seconds(mediaPlayer.getCurrentTime().toSeconds())) + " / " + formatDuration(mediaPlayer.getTotalDuration()));
-                    }
-                }
-            };
-
-             */
 
             //On vérifie s'il y a une pochette
             if (this.TrackLoaded.getTrackPicture() != null) {
@@ -760,21 +672,21 @@ public class CatalogController {
     }
 
     private void deleteTrackWaiting(TTrack track) {
-        int indexTrackDeleted = dataWaitingTrackList.indexOf(track);
         int countTrack;
         catalog.activeTrack(track);
         dataWaitingTrackList.remove(track);
         track.setTrackWaiting(false);
         trackService.saveTrackService(track);
         countTrack = waitingTrackListView.getItems().size();
-        if (indexTrackDeleted < this.index) {
-            this.index -= 1;
-            if (this.index == 0) previousBtn.setDisable(true);
-        }
-        if (countTrack == 1 || this.index == countTrack - 1) nextBtn.setDisable(true);
 
-        if (track.equals(TrackLoaded)) NextEvent();
-        updateListViewStyle();
+        if (countTrack == 1 || this.index == countTrack - 1) nextBtn.setDisable(true);
+        if (track.equals(TrackLoaded)) {
+            this.remote.setCommand(stopCommand).execute();
+            updateListViewStyle();
+            this.index-=1;
+            NextEvent(false);
+        }
+        else updateListViewStyle();
     }
 
     @FXML
@@ -871,7 +783,7 @@ public class CatalogController {
     private void emptyWaitingEvent() {
 
         for (TTrack track : dataWaitingTrackList) {
-            if (this.remote.setCommand(getPlayerCommand).execute() != null && this.remote.setCommand(getStatusCommand).execute() == STATUS.PLAYING) {
+            if (this.remote.setCommand(getPlayerCommand).execute() != null && Objects.equals(this.status.getStatus(), STATUS.PLAYING.toString())) {
                 StopEvent();
             }
             catalog.activeTrack(track);

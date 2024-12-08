@@ -10,7 +10,7 @@ public interface Player {
     void stop();
     void pause();
     boolean isNull();
-    String getStatus();
+    Object getStatus();
     void setVolume(double volume);
     double getVolume();
     Duration getCurrentTime();

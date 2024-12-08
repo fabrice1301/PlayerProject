@@ -11,6 +11,7 @@ import java.io.File;
 
 public class MPlayer implements Player {
     private MediaPlayer mediaPlayer;
+    private enum STATUS {PLAYING, STOPPED, PAUSED}
 
     @Override
     public Object getInstance() {
@@ -45,8 +46,24 @@ public class MPlayer implements Player {
     }
 
     @Override
-    public String getStatus() {
-        return this.mediaPlayer.getStatus().toString();
+    public Object getStatus() {
+        int status;
+        switch (mediaPlayer.getStatus()){
+            case PLAYING -> {
+                return STATUS.PLAYING;
+            }
+            case STOPPED -> {
+                return STATUS.STOPPED;
+            }
+            case PAUSED -> {
+                return STATUS.PAUSED;
+            }
+            default -> {
+                return null;
+            }
+        }
+
+
     }
 
     @Override
