@@ -8,7 +8,6 @@ import javafx.util.Duration;
 import java.io.File;
 
 
-
 public class MPlayer implements Player {
     private MediaPlayer mediaPlayer;
     private enum STATUS {PLAYING, STOPPED, PAUSED}
@@ -62,8 +61,6 @@ public class MPlayer implements Player {
                 return null;
             }
         }
-
-
     }
 
     @Override
@@ -100,7 +97,4 @@ public class MPlayer implements Player {
     public void seek(Duration time) {
         this.mediaPlayer.seek(time);
     }
-
-
-
 }

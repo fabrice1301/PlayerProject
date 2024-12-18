@@ -1,5 +1,6 @@
 package eafc.peruwelz.playerproject.service;
 
+import eafc.peruwelz.playerproject.domain.TArtist;
 import eafc.peruwelz.playerproject.domain.TTrack;
 import eafc.peruwelz.playerproject.repos.TTrackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +29,17 @@ public class TrackService {
     }
 
     public List<TTrack> findAllTrackService(){
+
         return trackRepository.findAll();
     }
 
     public List<TTrack> findByWaitingService(Boolean waiting){
         return trackRepository.findByTrackWaiting(waiting);
+    }
+
+    public List<TTrack> findByArtistService(TArtist artist){
+        List<TTrack> byArtist = trackRepository.findByTrackArtistListContains(artist);
+        return byArtist;
     }
 
 /*

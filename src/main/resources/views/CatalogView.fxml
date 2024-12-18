@@ -73,9 +73,8 @@
                            <contextMenu>
                               <ContextMenu fx:id="CatalogContextMenu">
                                 <items>
-                                    <MenuItem fx:id="addTrackMenu" mnemonicParsing="false" onAction="#addTrackEvent" text="Ajouter une piste" />
-                                    <MenuItem fx:id="deleteTrackMenu" mnemonicParsing="false" onAction="#deleteTrackEvent" text="Supprimer la piste" />
-                                    <MenuItem fx:id="modifyTrackMenu" mnemonicParsing="false" onAction="#ModifyTrackEvent" text="Modifier la piste" />
+                                    <MenuItem fx:id="deleteTrackMenu" mnemonicParsing="false" onAction="#deleteTrackEvent" text="Supprimer" />
+                                    <MenuItem fx:id="modifyTrackMenu" mnemonicParsing="false" onAction="#ModifyTrackEvent" text="Modifier" />
                                     <SeparatorMenuItem mnemonicParsing="false" />
                                   <MenuItem fx:id="AddListenedTrackListMenu" disable="true" mnemonicParsing="false" onAction="#AddTrackWaitingListEvent" text="Ajouter la piste à la liste d'écoute" />
                                 </items>
@@ -85,6 +84,11 @@
                           </children>
                       </HBox>
                       <HBox alignment="TOP_CENTER" prefHeight="78.0" prefWidth="858.0" />
+                  <Button fx:id="addTrackBtn" defaultButton="true" mnemonicParsing="false" onAction="#addTrackEvent" text="Ajouter une piste">
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </Button>
                       <VBox alignment="CENTER" disable="true" prefHeight="195.0" prefWidth="858.0">
                           <VBox.margin>
                               <Insets bottom="50.0" top="50.0" />
@@ -106,33 +110,54 @@
                   </Button>
                </children>
             </VBox>
-              <VBox fx:id="listenZone" prefHeight="760.0" prefWidth="374.0">
-                  <children>
-                        <Label text="Liste d'écoute">
-                            <font>
-                                <Font name="Calibri" size="18.0" />
-                            </font>
-                        </Label>
-                          <ListView fx:id="waitingTrackListView" onMouseClicked="#selectWaitingTrackList" prefHeight="595.0" prefWidth="337.0">
-                     <contextMenu>
-                        <ContextMenu fx:id="WaitingContextMenu">
-                          <items>
-                            <MenuItem fx:id="deleteWaitingTrackMenu" mnemonicParsing="false" onAction="#deleteWaitingTrackEvent" text="Supprimer de la liste" />
-                              <MenuItem fx:id="upWaitingMenu" mnemonicParsing="false" onAction="#upWaitingEvent" text="Monter" />
-                              <MenuItem fx:id="downWaitingMenu" mnemonicParsing="false" onAction="#downWaitingEvent" text="Descendre" />
-                              <MenuItem fx:id="emptyWaitingMenu" mnemonicParsing="false" onAction="#emptyWaitingEvent" text="Vider la liste" />
-                          </items>
-                        </ContextMenu>
-                     </contextMenu>
-                  </ListView>
-                  </children>
-                  <padding>
-                      <Insets left="20.0" right="20.0" top="80.0" />
-                  </padding>
+            <VBox>
                <HBox.margin>
                   <Insets />
                </HBox.margin>
-              </VBox>
+               <children>
+                  <HBox prefHeight="70.0" prefWidth="374.0">
+                     <children>
+                        <ComboBox fx:id="addPlaylistComboBox" editable="true" onMouseClicked="#SetupPlaylistComboBoxEvent" prefWidth="150.0">
+                           <HBox.margin>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                           </HBox.margin>
+                        </ComboBox>
+                        <Button fx:id="addPlaylistBtn" mnemonicParsing="false" onAction="#addPlaylistEvent" text="Ajouter">
+                           <HBox.margin>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                           </HBox.margin>
+                        </Button>
+                     </children>
+                     <padding>
+                        <Insets left="10.0" top="20.0" />
+                     </padding>
+                  </HBox>
+                    <VBox fx:id="listenZone" prefHeight="603.0" prefWidth="374.0">
+                        <children>
+                              <Label text="Liste d'écoute">
+                                  <font>
+                                      <Font name="Calibri" size="18.0" />
+                                  </font>
+                              </Label>
+                                <ListView fx:id="waitingTrackListView" onMouseClicked="#selectWaitingTrackList" prefHeight="595.0" prefWidth="337.0">
+                           <contextMenu>
+                              <ContextMenu fx:id="WaitingContextMenu">
+                                <items>
+                                  <MenuItem fx:id="deleteWaitingTrackMenu" mnemonicParsing="false" onAction="#deleteWaitingTrackEvent" text="Supprimer de la liste" />
+                                    <MenuItem fx:id="upWaitingMenu" mnemonicParsing="false" onAction="#upWaitingEvent" text="Monter" />
+                                    <MenuItem fx:id="downWaitingMenu" mnemonicParsing="false" onAction="#downWaitingEvent" text="Descendre" />
+                                    <MenuItem fx:id="emptyWaitingMenu" mnemonicParsing="false" onAction="#emptyWaitingEvent" text="Vider la liste" />
+                                </items>
+                              </ContextMenu>
+                           </contextMenu>
+                        </ListView>
+                        </children>
+                        <padding>
+                            <Insets left="20.0" right="20.0" top="20.0" />
+                        </padding>
+                    </VBox>
+               </children>
+            </VBox>
           </children>
       </HBox>
       <HBox fx:id="playZone" alignment="BOTTOM_CENTER" disable="true" prefHeight="70.0" prefWidth="1304.0">

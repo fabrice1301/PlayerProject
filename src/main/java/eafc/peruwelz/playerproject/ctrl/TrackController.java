@@ -1,5 +1,7 @@
 package eafc.peruwelz.playerproject.ctrl;
 
+import eafc.peruwelz.playerproject.Class.AlertClass;
+import eafc.peruwelz.playerproject.Class.Filter;
 import eafc.peruwelz.playerproject.domain.*;
 
 import eafc.peruwelz.playerproject.Class.Catalog;
@@ -16,11 +18,14 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.tritonus.share.sampled.file.TAudioFileFormat;
 
@@ -33,8 +38,11 @@ import java.io.IOException;
 import java.util.*;
 
 @Controller
-public class AddTrackController {
+public class TrackController {
 
+    @Autowired
+    private ApplicationContext context;
+    private CatalogController catalogController;
     private TTrack track;
     private TTrack trackToModify;
     private TGenre genre;
@@ -137,13 +145,14 @@ public class AddTrackController {
     private TableColumn<AlbumModelSelection, String> albumNameCol;
 
     @Autowired
-    public AddTrackController(TrackService trackService, Catalog catalog, GenreService genreService, ArtistService artistService, PlaylistService playlistService, AlbumService albumService){
+    public TrackController(TrackService trackService, Catalog catalog, GenreService genreService, ArtistService artistService, PlaylistService playlistService, AlbumService albumService,CatalogController catalogController){
         this.trackService=trackService;
         this.genreService=genreService;
         this.artistService=artistService;
         this.playlistService=playlistService;
         this.albumService=albumService;
         this.catalog = catalog;
+        this.catalogController=catalogController;
     }
 
     @FXML
@@ -172,12 +181,44 @@ public class AddTrackController {
         this.selectedArtistCol.setCellFactory(tc -> new CheckBoxTableCell<>());
         this.artistNameCol.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getArtist().getArtistName()));
+        artistNameCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        artistNameCol.setOnEditCommit(event -> {
+            ArtistModelSelection artist = event.getRowValue();
+            String newName = event.getNewValue();
+            if ((newName == null || newName.trim().isEmpty())) {
+                artistTableView.refresh();
+            } else {
+                artist.getArtist().setArtistName(newName);
+                artistService.saveArtistService(artist.getArtist());
+                Filter.filterInstance.reload();
+            }
+        });
         List<TArtist> listArtist = artistService.findAllArtistService();
         dataArtistTable = FXCollections.observableArrayList();
         for (TArtist artist : listArtist) {
             dataArtistTable.add(new ArtistModelSelection(artist, false));
         }
         artistTableView.setItems(dataArtistTable);
+        artistTableView.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.DELETE) {
+                TArtist selectedItem = artistTableView.getSelectionModel().getSelectedItem();
+                int index=artistTableView.getSelectionModel().getSelectedIndex();
+                TArtist deletedArtist = artistTableView.getSelectionModel().getSelectedItem().getArtist();
+                if (selectedItem != null && trackService.findByArtistService(deletedArtist).isEmpty()) {
+                    if ( AlertClass.showConfirmationDeleteDialog("cet article")){
+                        dataArtistTable.remove(index);
+                        artistService.deleteArtistService(deletedArtist);
+                        artistTableView.getSelectionModel().clearSelection();
+                        artistTableView.refresh();
+                    }
+                }else{
+                    AlertClass.showInformationDeleteDialog("cet article");
+                    System.out.println("Alerte");
+                }
+            }
+        });
+
+
 
         //Gestion des playlists
         this.selectedPlaylistCol.setCellValueFactory(new PropertyValueFactory<>("selected"));
@@ -208,11 +249,10 @@ public class AddTrackController {
     public void setTrackToModify(TTrack track, Boolean update){
         if (track != null){
             this.update=update;
-            trackToModify=track;
+            this.trackToModify=track;
             trackPathField.setText(this.trackToModify.getTrackPath());
             trackTitleField.setText(this.trackToModify.getTrackTitle());
             dateTrack.setValue(this.trackToModify.getTrackDate());
-            //trackPathPictureField.setText(this.trackToModify.getTrackPicture());
             if (trackToModify.getTrackPicture()!=null){
                 trackPathPicture=this.trackToModify.getTrackPicture();
                 Image image=new Image(trackPathPicture);
@@ -264,7 +304,9 @@ public class AddTrackController {
     @FXML
     private void saveTrackEvent() throws UnsupportedAudioFileException, IOException {
         track=new TTrack();
-        if (this.update) track=this.trackToModify;
+        if (this.update) {
+            track=this.trackToModify;
+        }
 
         //On vérifie qu'un titre a été renseigné
         if (Objects.equals(trackTitleField.getText(), "")) {
@@ -317,7 +359,7 @@ public class AddTrackController {
 
         //On sauve la piste avec ses propriétés
         this.trackService.saveTrackService(this.track);
-        
+
         if (!this.update) this.catalog.addTrack(this.track);
         else this.catalog.modifyTrack(catalog.getIndex(track),track);
         this.catalog.sortCatalog();
@@ -355,7 +397,12 @@ public class AddTrackController {
         artist=new TArtist();
         artist.setArtistName(artistNameField.getText());
         artistService.saveArtistService(artist);
-        dataArtistTable.add(new ArtistModelSelection(artist, false));
+        List<TArtist> listArtist=artistService.findAllArtistService();
+        dataArtistTable.clear();
+        for (TArtist artist:listArtist){
+            dataArtistTable.add(new ArtistModelSelection(artist,false));
+        }
+        artistTableView.refresh();
     }
 
     @FXML
@@ -398,5 +445,13 @@ public class AddTrackController {
 
     public void setUpdate(Boolean update){
         this.update=update;
+    }
+
+    public static boolean AlertDeleteDialog() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmation de suppression");
+        alert.setHeaderText("Voulez-vous vraiment supprimer cet artiste ?");
+        Optional<ButtonType> result = alert.showAndWait();
+        return result.isPresent() && result.get() == ButtonType.OK;
     }
 }

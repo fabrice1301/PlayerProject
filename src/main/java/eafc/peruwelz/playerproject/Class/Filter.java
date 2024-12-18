@@ -27,7 +27,7 @@ public class Filter {
     private String artistFilter = null;
     private String albumFilter = null;
     private String textFilter = null;
-    private CatalogController catalogController;
+    public static Filter filterInstance;
 
     public Filter(ComboBox playlist, ComboBox genre, ComboBox artist, ComboBox album, TrackService trackService,TextField searchField,Catalog catalog, CatalogController catalogController){
         this.catalog=catalog;
@@ -38,16 +38,16 @@ public class Filter {
         this.trackService=trackService;
         this.searchField=searchField;
         List<TTrack> trackList = this.trackService.findAllTrackService();
-        dataCatalogTable = this.catalog.reloadCatalogTableView(trackList);
-        this.catalogController=catalogController;
+        this.catalog.setDataCatalogTable(trackList);
+        Filter.filterInstance=this;
     }
 
-    public ObservableList<TTrack> setup() {
+    public void setup() {
         // Ajout d'un listener pour la ComboBox des genres
         genreComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null && !newValue.toString().equals(genreFilter)) {
                 genreFilter=newValue.toString();
-                dataCatalogTable.setAll(reload());
+                reload();
             }
         });
 
@@ -55,7 +55,7 @@ public class Filter {
         playlistComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null && !newValue.toString().equals(playlistFilter)) {
                 playlistFilter=newValue.toString();
-                dataCatalogTable.setAll(reload());
+                reload();
             }
         });
 
@@ -63,7 +63,7 @@ public class Filter {
         artistComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null && !newValue.toString().equals(artistFilter)) {
                 artistFilter=newValue.toString();
-                dataCatalogTable.setAll(reload());
+                reload();
             }
         });
 
@@ -71,20 +71,19 @@ public class Filter {
         albumComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null && !newValue.toString().equals(albumFilter)) {
                 albumFilter=newValue.toString();
-                dataCatalogTable.setAll(reload());
+                reload();
             }
         });
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
             textFilter = newValue;
-            dataCatalogTable.setAll(reload());
+            reload();
         });
 
-        return dataCatalogTable;
     }
 
     public ComboBox reloadAlbum() {
         data = FXCollections.observableArrayList(
-                dataCatalogTable.stream()
+                this.catalog.getDataCatalogTable().stream()
                         .flatMap(track -> track.getTrackAlbumList().stream()
                                 .map(TAlbum::getAlbumName))
                         .distinct()
@@ -94,12 +93,11 @@ public class Filter {
         albumComboBox.setItems(data);
         albumComboBox.getItems().add(0, "Tous les albums");
         return artistComboBox;
-        //if (albumFilter == null) albumComboBox.getSelectionModel().select(0);
     }
 
     public ComboBox reloadGenre() {
         data = FXCollections.observableArrayList(
-                dataCatalogTable.stream()
+                this.catalog.getDataCatalogTable().stream()
                         .flatMap(track -> track.getTrackGenreList().stream()
                                 .map(TGenre::getGenreName))
                         .distinct()
@@ -109,12 +107,11 @@ public class Filter {
         genreComboBox.setItems(data);
         genreComboBox.getItems().add(0, "Tous les genres");
         return genreComboBox;
-        //if (albumFilter == null) albumComboBox.getSelectionModel().select(0);
     }
 
     public ComboBox reloadArtist() {
         data = FXCollections.observableArrayList(
-                dataCatalogTable.stream()
+                this.catalog.getDataCatalogTable().stream()
                         .flatMap(track -> track.getTrackArtistList().stream()
                                 .map(TArtist::getArtistName))
                         .distinct()
@@ -124,12 +121,11 @@ public class Filter {
         artistComboBox.setItems(data);
         artistComboBox.getItems().add(0, "Tous les artistes");
         return artistComboBox;
-        //if (albumFilter == null) albumComboBox.getSelectionModel().select(0);
     }
 
     public ComboBox reloadPlaylist() {
         data = FXCollections.observableArrayList(
-                dataCatalogTable.stream()
+                this.catalog.getDataCatalogTable().stream()
                         .flatMap(track -> track.getTrackPlaylistList().stream()
                                 .map(TPlaylist::getPlaylistName))
                         .distinct()
@@ -139,16 +135,13 @@ public class Filter {
         playlistComboBox.setItems(data);
         playlistComboBox.getItems().add(0, "Toutes les playlists");
         return playlistComboBox;
-
     }
 
-    public ObservableList<TTrack> reload() {
+    public void reload() {
         if (Objects.equals(genreFilter, "Tous les genres")) genreFilter = null;
         if (Objects.equals(albumFilter, "Tous les albums")) albumFilter = null;
         if (Objects.equals(playlistFilter, "Toutes les playlists")) playlistFilter = null;
         if (Objects.equals(artistFilter, "Tous les artistes")) artistFilter = null;
-
-
         List<TTrack> allTracks = trackService.findAllTrackService();
         List<TTrack> filteredTracks = allTracks.stream()
                 .filter(track -> {
@@ -160,33 +153,9 @@ public class Filter {
                     return matchesPlaylist && matchesGenre && matchesAlbum && matchesArtist && matchesSearchField;
                 })
                 .collect(Collectors.toList());
-        dataCatalogTable = catalog.reloadCatalogTableView(filteredTracks);
-        catalogController.refreshCatalogTableView(this.dataCatalogTable);
-        return dataCatalogTable;
+        this.catalog.setDataCatalogTable(filteredTracks);
     }
 
-    public void setAlbumFilter(String albumFilter){
-        this.albumFilter=albumFilter;
-    }
 
-    public String getAlbumFilter(){
-        return this.albumFilter;
-    }
-
-    public void setGenreFilter(String genreFilter){
-        this.genreFilter=genreFilter;
-    }
-
-    public void setArtistFilter(String artistFilter){
-        this.artistFilter=artistFilter;
-    }
-
-    public void setPlaylistFilter(String playlistFilter){
-        this.playlistFilter=playlistFilter;
-    }
-
-    public int getAlbumComboBox(){
-        return albumComboBox.getSelectionModel().getSelectedIndex();
-    }
 
 }

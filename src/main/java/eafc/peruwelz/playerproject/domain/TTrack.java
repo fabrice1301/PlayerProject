@@ -36,7 +36,7 @@ public class TTrack {
     @Column
     private Integer trackCount=0;
 
-    @Column(columnDefinition = "tinyint", length = 1)
+    //@Column(columnDefinition = "tinyint", length = 1)
     private Boolean trackWaiting=false;
 
     @Column(columnDefinition = "tinyint", length = 1)

@@ -1,6 +1,6 @@
 package eafc.peruwelz.playerproject;
 
-import eafc.peruwelz.playerproject.ctrl.AddTrackController;
+import eafc.peruwelz.playerproject.Class.Catalog;
 import eafc.peruwelz.playerproject.ctrl.CatalogController;
 import eafc.peruwelz.playerproject.player.MPlayer;
 import javafx.application.Platform;
@@ -28,15 +28,16 @@ public class PlayerProjectApplication extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        CatalogController controller=context.getBean(CatalogController.class);
+        CatalogController controller= context.getBean(CatalogController.class);
+        Catalog catalog= context.getBean(Catalog.class);
         controller.setPlayer(new MPlayer());
+        catalog.setCatalogController(controller);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/CatalogView.fxml"));
         loader.setControllerFactory(context::getBean);
         Parent root=loader.load();
-
         stage.setTitle("Player Project");
         stage.setScene(new Scene(root));
-        stage.setResizable(false);
+        //stage.setResizable(false);
         stage.show();
         stage.setOnCloseRequest((Event -> Platform.exit()));
     }

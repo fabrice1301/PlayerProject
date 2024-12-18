@@ -1,31 +1,42 @@
 package eafc.peruwelz.playerproject.Class;
 
+import eafc.peruwelz.playerproject.ctrl.CatalogController;
 import eafc.peruwelz.playerproject.domain.TTrack;
+import eafc.peruwelz.playerproject.service.TrackService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Component
 public class Catalog {
 
     private ObservableList<TTrack> dataCatalogTable;
+    private CatalogController catalogController;
+    private final TrackService trackService;
 
-    public ObservableList<TTrack> reloadCatalogTableView(List<TTrack> listTrack){
-        this.dataCatalogTable = FXCollections.observableArrayList(
-                listTrack.stream().sorted(Comparator.comparing(TTrack::getTrackTitle)).collect(Collectors.toList())
-        );
-        return this.dataCatalogTable;
+    @Autowired
+    public Catalog(TrackService trackService){
+        this.dataCatalogTable=FXCollections.observableArrayList();
+        this.trackService=trackService;
+        List<TTrack> trackList = this.trackService.findAllTrackService();
+        this.dataCatalogTable.addAll(trackList);
+    }
+
+    public void setCatalogController(CatalogController catalogController){
+        this.catalogController=catalogController;
     }
 
     public void addTrack(TTrack track) {
         dataCatalogTable.add(track);
     }
 
-    public void modifyTrack(int index,TTrack track){ dataCatalogTable.set(index,track);}
+    public void modifyTrack(int index,TTrack track){
+        dataCatalogTable.set(index,track);
+    }
 
     public int getIndex(TTrack track){
         return dataCatalogTable.indexOf(track);
@@ -43,6 +54,32 @@ public class Catalog {
     public void sortCatalog()
     {
         FXCollections.sort(this.dataCatalogTable, Comparator.comparing(TTrack::getTrackTitle));
+    }
+
+
+    public void setDataCatalogTable(List<TTrack> list){
+        this.dataCatalogTable.setAll(list.stream().sorted(Comparator.comparing(TTrack::getTrackTitle)).toList());
+        //catalogController.refreshTableView();
+    }
+
+    public ObservableList<TTrack> getDataCatalogTable(){
+        return this.dataCatalogTable;
+    }
+
+    public void removeTrack(TTrack track){
+        this.dataCatalogTable.remove(track);
+    }
+
+    public TTrack getTrackByIndex(int index){
+        return dataCatalogTable.get(index);
+    }
+
+
+    public void initTrackWaiting(){
+        for(TTrack track:this.dataCatalogTable){
+            track.setTrackWaiting(false);
+            trackService.saveTrackService(track);
+        }
     }
 
 
