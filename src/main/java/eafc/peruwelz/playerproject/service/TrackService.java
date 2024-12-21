@@ -1,7 +1,6 @@
 package eafc.peruwelz.playerproject.service;
 
-import eafc.peruwelz.playerproject.domain.TArtist;
-import eafc.peruwelz.playerproject.domain.TTrack;
+import eafc.peruwelz.playerproject.domain.*;
 import eafc.peruwelz.playerproject.repos.TTrackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,6 +39,21 @@ public class TrackService {
     public List<TTrack> findByArtistService(TArtist artist){
         List<TTrack> byArtist = trackRepository.findByTrackArtistListContains(artist);
         return byArtist;
+    }
+
+    public List<TTrack> findByGenreService(TGenre genre){
+        List<TTrack> byGenre = trackRepository.findByTrackGenreListContains(genre);
+        return byGenre;
+    }
+
+    public List<TTrack> findByAlbumService(TAlbum album){
+        List<TTrack> byAlbum = trackRepository.findByTrackAlbumListContains(album);
+        return byAlbum;
+    }
+
+    public List<TTrack> findByPlaylistService(TPlaylist playlist){
+        List<TTrack> byPlaylist = trackRepository.findByTrackPlaylistListContains(playlist);
+        return byPlaylist;
     }
 
 /*

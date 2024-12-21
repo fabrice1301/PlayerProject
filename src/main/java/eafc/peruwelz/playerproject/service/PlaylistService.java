@@ -36,6 +36,8 @@ public class PlaylistService {
         playlistRepository.save(playlist);
     }
 
+    public void deletePlaylistService(TPlaylist playlist){playlistRepository.delete(playlist);}
+
     public Set<TTrack> getTrack(TPlaylist playlist){
         return playlist.getPlaylistTrackList();
     }

@@ -164,18 +164,6 @@ public class TrackController {
         searchPictureTrackBtn.setText("\uD83D\uDD0D " + searchPictureTrackBtn.getText());
         this.trackPathPicture=null;
 
-        //Gestion des genres
-        this.selectedGenreCol.setCellValueFactory(new PropertyValueFactory<>("selected"));
-        this.selectedGenreCol.setCellFactory(tc -> new CheckBoxTableCell<>());
-        this.genreNameCol.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getGenre().getGenreName()));
-        List<TGenre> listGenre = genreService.findAllGenreService();
-        dataGenreTable = FXCollections.observableArrayList();
-        for (TGenre genre : listGenre) {
-            dataGenreTable.add(new GenreModelSelection(genre, false));
-        }
-        genreTableView.setItems(dataGenreTable);
-
         //Gestion des artistes
         this.selectedArtistCol.setCellValueFactory(new PropertyValueFactory<>("selected"));
         this.selectedArtistCol.setCellFactory(tc -> new CheckBoxTableCell<>());
@@ -219,30 +207,131 @@ public class TrackController {
         });
 
 
-
-        //Gestion des playlists
-        this.selectedPlaylistCol.setCellValueFactory(new PropertyValueFactory<>("selected"));
-        this.selectedPlaylistCol.setCellFactory(tc -> new CheckBoxTableCell<>());
-        this.playlistNameCol.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getPlaylist().getPlaylistName()));
-        List<TPlaylist> listPlaylist = playlistService.findAllPlaylistService();
-        dataPlaylistTable = FXCollections.observableArrayList();
-        for (TPlaylist playlist : listPlaylist) {
-            dataPlaylistTable.add(new PlaylistModelSelection(playlist, false));
+        // Gestion des genres
+        this.selectedGenreCol.setCellValueFactory(new PropertyValueFactory<>("selected"));
+        this.selectedGenreCol.setCellFactory(tc -> new CheckBoxTableCell<>());
+        this.genreNameCol.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getGenre().getGenreName()));
+        genreNameCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        genreNameCol.setOnEditCommit(event -> {
+            GenreModelSelection genre = event.getRowValue();
+            String newName = event.getNewValue();
+            if (newName == null || newName.trim().isEmpty()) {
+                genreTableView.refresh();
+            } else {
+                genre.getGenre().setGenreName(newName);
+                genreService.saveGenreService(genre.getGenre());
+                Filter.filterInstance.reload();
+            }
+        });
+        List<TGenre> listGenre = genreService.findAllGenreService();
+        dataGenreTable = FXCollections.observableArrayList();
+        for (TGenre genre : listGenre) {
+            dataGenreTable.add(new GenreModelSelection(genre, false));
         }
-        playlistTableView.setItems(dataPlaylistTable);
+        genreTableView.setItems(dataGenreTable);
+        genreTableView.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.DELETE) {
+                TGenre selectedItem = genreTableView.getSelectionModel().getSelectedItem();
+                int index = genreTableView.getSelectionModel().getSelectedIndex();
+                TGenre deletedGenre = genreTableView.getSelectionModel().getSelectedItem().getGenre();
+                if (selectedItem != null && trackService.findByGenreService(deletedGenre).isEmpty()) {
+                    if (AlertClass.showConfirmationDeleteDialog("ce genre")) {
+                        dataGenreTable.remove(index);
+                        genreService.deleteGenreService(deletedGenre);
+                        genreTableView.getSelectionModel().clearSelection();
+                        genreTableView.refresh();
+                    }
+                } else {
+                    AlertClass.showInformationDeleteDialog("ce genre");
+                    System.out.println("Alerte");
+                }
+            }
+        });
 
-        //Gestion des albums
+// Gestion des albums
         this.selectedAlbumCol.setCellValueFactory(new PropertyValueFactory<>("selected"));
         this.selectedAlbumCol.setCellFactory(tc -> new CheckBoxTableCell<>());
         this.albumNameCol.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getAlbum().getAlbumName()));
+        albumNameCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        albumNameCol.setOnEditCommit(event -> {
+            AlbumModelSelection album = event.getRowValue();
+            String newName = event.getNewValue();
+            if (newName == null || newName.trim().isEmpty()) {
+                albumTableView.refresh();
+            } else {
+                album.getAlbum().setAlbumName(newName);
+                albumService.saveAlbumService(album.getAlbum());
+                Filter.filterInstance.reload();
+            }
+        });
         List<TAlbum> listAlbum = albumService.findAllAlbumService();
         dataAlbumTable = FXCollections.observableArrayList();
         for (TAlbum album : listAlbum) {
             dataAlbumTable.add(new AlbumModelSelection(album, false));
         }
         albumTableView.setItems(dataAlbumTable);
+        albumTableView.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.DELETE) {
+                TAlbum selectedItem = albumTableView.getSelectionModel().getSelectedItem();
+                int index = albumTableView.getSelectionModel().getSelectedIndex();
+                TAlbum deletedAlbum = albumTableView.getSelectionModel().getSelectedItem().getAlbum();
+                if (selectedItem != null && trackService.findByAlbumService(deletedAlbum).isEmpty()) {
+                    if (AlertClass.showConfirmationDeleteDialog("cet album")) {
+                        dataAlbumTable.remove(index);
+                        albumService.deleteAlbumService(deletedAlbum);
+                        albumTableView.getSelectionModel().clearSelection();
+                        albumTableView.refresh();
+                    }
+                } else {
+                    AlertClass.showInformationDeleteDialog("cet album");
+                    System.out.println("Alerte");
+                }
+            }
+        });
+
+// Gestion des playlists
+        this.selectedPlaylistCol.setCellValueFactory(new PropertyValueFactory<>("selected"));
+        this.selectedPlaylistCol.setCellFactory(tc -> new CheckBoxTableCell<>());
+        this.playlistNameCol.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getPlaylist().getPlaylistName()));
+        playlistNameCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        playlistNameCol.setOnEditCommit(event -> {
+            PlaylistModelSelection playlist = event.getRowValue();
+            String newName = event.getNewValue();
+            if (newName == null || newName.trim().isEmpty()) {
+                playlistTableView.refresh();
+            } else {
+                playlist.getPlaylist().setPlaylistName(newName);
+                playlistService.savePlaylistService(playlist.getPlaylist());
+                Filter.filterInstance.reload();
+            }
+        });
+        List<TPlaylist> listPlaylist = playlistService.findAllPlaylistService();
+        dataPlaylistTable = FXCollections.observableArrayList();
+        for (TPlaylist playlist : listPlaylist) {
+            dataPlaylistTable.add(new PlaylistModelSelection(playlist, false));
+        }
+        playlistTableView.setItems(dataPlaylistTable);
+        playlistTableView.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.DELETE) {
+                TPlaylist selectedItem = playlistTableView.getSelectionModel().getSelectedItem();
+                int index = playlistTableView.getSelectionModel().getSelectedIndex();
+                TPlaylist deletedPlaylist = playlistTableView.getSelectionModel().getSelectedItem().getPlaylist();
+                if (selectedItem != null && trackService.findByPlaylistService(deletedPlaylist).isEmpty()) {
+                    if (AlertClass.showConfirmationDeleteDialog("cette playlist")) {
+                        dataPlaylistTable.remove(index);
+                        playlistService.deletePlaylistService(deletedPlaylist);
+                        playlistTableView.getSelectionModel().clearSelection();
+                        playlistTableView.refresh();
+                    }
+                } else {
+                    AlertClass.showInformationDeleteDialog("cette playlist");
+                    System.out.println("Alerte");
+                }
+            }
+        });
     }
 
 
@@ -251,6 +340,8 @@ public class TrackController {
             this.update=update;
             this.trackToModify=track;
             trackPathField.setText(this.trackToModify.getTrackPath());
+            System.out.println(track.getTrackPath());
+            System.out.println(trackToModify.getTrackPath());
             trackTitleField.setText(this.trackToModify.getTrackTitle());
             dateTrack.setValue(this.trackToModify.getTrackDate());
             if (trackToModify.getTrackPicture()!=null){
@@ -318,6 +409,8 @@ public class TrackController {
         }
 
         //On récupère le chemin du fichier
+
+        this.track.setTrackPath(trackPathField.getText());
         if (this.file!=null) {
             this.track.setTrackPath(file.getAbsolutePath());
             AudioFileFormat formatFile = AudioSystem.getAudioFileFormat(file);
@@ -330,6 +423,7 @@ public class TrackController {
                 int time = (int) (timeMicroSecondes / 1000000);
                 this.track.setTrackTime(time);
             }
+            this.file=null;
         }
 
         //On récupère les genres sélectionnés
@@ -389,13 +483,20 @@ public class TrackController {
             genre = new TGenre();
             genre.setGenreName(genreNameField.getText());
             genreService.saveGenreService(genre);
-            List<TGenre> listGenre=genreService.findAllGenreService();
+            List<TGenre> list=genreService.findAllGenreService();
             this.dataGenreTable.clear();
-            for (TGenre genre:listGenre){
+            for (TGenre genre:list){
                 dataGenreTable.add(new GenreModelSelection(genre,false));
             }
             genreTableView.refresh();
             genreNameField.setText("");
+            //Si nous sommes la modification d'une track et non sur un ajout
+            if (this.update) {
+                Set<TGenre> listGenre = this.trackToModify.getTrackGenreList();
+                for (GenreModelSelection genre : dataGenreTable) {
+                    genre.setSelected(listGenre.contains(genre.getGenre()));
+                }
+            }
         }
     }
 
@@ -405,32 +506,64 @@ public class TrackController {
             artist=new TArtist();
             artist.setArtistName(artistNameField.getText());
             artistService.saveArtistService(artist);
-            List<TArtist> listArtist=artistService.findAllArtistService();
+            List<TArtist> list=artistService.findAllArtistService();
             dataArtistTable.clear();
-            for (TArtist artist:listArtist){
+            for (TArtist artist:list){
                 dataArtistTable.add(new ArtistModelSelection(artist,false));
             }
             artistTableView.refresh();
             artistNameField.setText("");
-        }
+            //Si nous sommes la modification d'une track et non sur un ajout
+            Set<TArtist> listArtist=this.trackToModify.getTrackArtistList();
+            for (ArtistModelSelection artist : dataArtistTable){
+                artist.setSelected(listArtist.contains(artist.getArtist()));
+            }
 
+        }
     }
 
     @FXML
     private void AddPlaylistEvent(){
-        playlist=new TPlaylist();
-        playlist.setPlaylistName(playlistNameField.getText());
-        playlistService.savePlaylistService(playlist);
-        dataPlaylistTable.add(new PlaylistModelSelection(playlist, false));
+        if (!playlistNameField.getText().isEmpty() && playlistNameField.getText().trim()!=""){
+            playlist=new TPlaylist();
+            playlist.setPlaylistName(playlistNameField.getText());
+            playlistService.savePlaylistService(playlist);
+            List<TPlaylist> list=playlistService.findAllPlaylistService();
+            dataPlaylistTable.clear();
+            for (TPlaylist playlist:list){
+                dataPlaylistTable.add(new PlaylistModelSelection(playlist,false));
+            }
+            playlistTableView.refresh();
+            playlistNameField.setText("");
+
+            //Si nous sommes la modification d'une track et non sur un ajout
+            Set<TPlaylist> listPlaylist=this.trackToModify.getTrackPlaylistList();
+            for (PlaylistModelSelection playlist : dataPlaylistTable){
+                playlist.setSelected(listPlaylist.contains(playlist.getPlaylist()));
+            }
+        }
     }
 
     @FXML
     private void AddAlbumEvent(){
-        album=new TAlbum();
-        album.setAlbumName(albumNameField.getText());
-        //album.setAlbumDeleted(false);
-        albumService.saveAlbumService(album);
-        dataAlbumTable.add(new AlbumModelSelection(album, false));
+        if (!albumNameField.getText().isEmpty() && albumNameField.getText().trim()!=""){
+            album=new TAlbum();
+            album.setAlbumName(albumNameField.getText());
+            albumService.saveAlbumService(album);
+            List<TAlbum> list=albumService.findAllAlbumService();
+            dataAlbumTable.clear();
+            for (TAlbum album:list){
+                dataAlbumTable.add(new AlbumModelSelection(album,false));
+            }
+            albumTableView.refresh();
+            albumNameField.setText("");
+
+            //Si nous sommes la modification d'une track et non sur un ajout
+            Set<TAlbum> listAlbum=this.trackToModify.getTrackAlbumList();
+            for (AlbumModelSelection album : dataAlbumTable){
+                album.setSelected(listAlbum.contains(album.getAlbum()));
+            }
+        }
     }
 
     @FXML

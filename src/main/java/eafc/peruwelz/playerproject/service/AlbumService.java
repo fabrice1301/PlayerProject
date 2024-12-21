@@ -30,4 +30,5 @@ public class AlbumService {
         albumRepository.save(album);
     }
 
+    public void deleteAlbumService(TAlbum album){albumRepository.delete(album);}
 }

@@ -1,9 +1,6 @@
 package eafc.peruwelz.playerproject.ctrl;
 
-import eafc.peruwelz.playerproject.Class.AlertClass;
-import eafc.peruwelz.playerproject.Class.Catalog;
-import eafc.peruwelz.playerproject.Class.Filter;
-import eafc.peruwelz.playerproject.Class.StatusPlayer;
+import eafc.peruwelz.playerproject.Class.*;
 import eafc.peruwelz.playerproject.command.*;
 import eafc.peruwelz.playerproject.domain.*;
 import eafc.peruwelz.playerproject.player.Player;
@@ -47,27 +44,19 @@ public class CatalogController {
     private final AlbumService albumService;
     private final Catalog catalog;
     private Player player;
-    private TTrack track;
     private TTrack TrackLoaded;
-    private File file;
     private Image initialPictureTrack;
-    private TTrack trackSelected;
-    private MediaPlayer mediaPlayer;
     private AnimationTimer timer; // Pour mettre à jour le Slider
     private Boolean muteStatus = false;
     private Integer index = -1;
     private Double volume = 0.5;
-    private String playlistFilter = null;
-    private String genreFilter = null;
-    private String artistFilter = null;
-    private String albumFilter = null;
-    private String textFilter = null;
-    private enum STATUS {PLAYING, STOPPED, PAUSED}
+    private enum STATUS {PLAYING, STOPPED, PAUSED, UNKNOW}
     private StatusPlayer status;
     private Boolean randomState = false;
     private Boolean reloadState = false;
     private String style1 = "-fx-background-color: #c5fca9; -fx-text-fill: black;";
     private Filter filter;
+    private LoadedTrack loadedTrack;
     @FXML
     private ContextMenu CatalogContextMenu;
     @FXML
@@ -117,8 +106,6 @@ public class CatalogController {
     private ListView<TTrack> waitingTrackListView;
     @FXML
     private TableView<TTrack> catalogTableView;
-    //@FXML
-    //private ObservableList<TTrack> dataCatalogTable;
     @FXML
     private ObservableList<String> dataPlaylist;
     @FXML
@@ -590,10 +577,6 @@ public class CatalogController {
         }
         nextBtn.setDisable(false);
 
-
-
-
-
     }
 
     @FXML
@@ -623,6 +606,11 @@ public class CatalogController {
             //On récupère la piste sélectionnée dans le catalogue
             if (newIndex != -1) this.index = newIndex;
             newTrack = dataWaitingTrackList.get(this.index);
+            if(this.status.getStatus()!=STATUS.STOPPED.toString() && this.status.getStatus()!=STATUS.UNKNOW.toString())
+            {
+                this.remote.setCommand(stopCommand).execute();
+                this.status.setStatus(STATUS.STOPPED.toString());
+            }
             loadTrack(newTrack);
             PlayEvent();
         }
@@ -844,12 +832,7 @@ public class CatalogController {
     public void refreshTableView(){
         catalogTableView.refresh();
         catalogTableView.setItems(this.catalog.getDataCatalogTable());
-        /*
-        for(TArtist artist:this.artistService.findAllArtistService()){
-            System.out.println(artist.getArtistName());
-        }
 
-         */
     }
 
     public void TableRefresh(){
