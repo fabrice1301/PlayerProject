@@ -1,16 +1,23 @@
 package eafc.peruwelz.playerproject.Class;
 
-
 public class StatusPlayer {
     private enum STATUS {PLAYING, STOPPED, PAUSED, UNKNOW}
     private STATUS status;
+    private static StatusPlayer instance;
 
-    public StatusPlayer(){
-        this.status=STATUS.UNKNOW;
+    private StatusPlayer(){
+        status=STATUS.UNKNOW;
+    }
+
+    public static StatusPlayer getInstance(){
+        if(instance==null){
+            instance=new StatusPlayer();
+        }
+        return instance;
     }
 
     public String getStatus(){
-        return this.status.toString();
+        return status.toString();
     }
 
     public void setStatus(String status){
