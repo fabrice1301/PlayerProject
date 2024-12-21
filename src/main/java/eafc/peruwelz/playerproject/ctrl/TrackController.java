@@ -54,7 +54,7 @@ public class TrackController {
     private ArtistService artistService;
     private PlaylistService playlistService;
     private AlbumService albumService;
-    private Catalog catalog;
+    //private Catalog catalog;
     private File file;
     private File picture;
     private String trackPathPicture;
@@ -145,13 +145,13 @@ public class TrackController {
     private TableColumn<AlbumModelSelection, String> albumNameCol;
 
     @Autowired
-    public TrackController(TrackService trackService, Catalog catalog, GenreService genreService, ArtistService artistService, PlaylistService playlistService, AlbumService albumService,CatalogController catalogController){
+    public TrackController(TrackService trackService, GenreService genreService, ArtistService artistService, PlaylistService playlistService, AlbumService albumService,CatalogController catalogController){
         this.trackService=trackService;
         this.genreService=genreService;
         this.artistService=artistService;
         this.playlistService=playlistService;
         this.albumService=albumService;
-        this.catalog = catalog;
+        //this.catalog = Catalog.getInstance();
         this.catalogController=catalogController;
     }
 
@@ -454,9 +454,9 @@ public class TrackController {
         //On sauve la piste avec ses propriétés
         this.trackService.saveTrackService(this.track);
 
-        if (!this.update) this.catalog.addTrack(this.track);
-        else this.catalog.modifyTrack(catalog.getIndex(track),track);
-        this.catalog.sortCatalog();
+        if (!this.update) Catalog.getInstance().addTrack(this.track);
+        else Catalog.getInstance().modifyTrack(Catalog.getInstance().getIndex(track),track);
+        Catalog.getInstance().sortCatalog();
         CancelEvent();
     }
 

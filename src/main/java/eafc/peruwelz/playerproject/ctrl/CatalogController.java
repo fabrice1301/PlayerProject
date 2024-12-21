@@ -42,7 +42,7 @@ public class CatalogController {
     private final ArtistService artistService;
     private final PlaylistService playlistService;
     private final AlbumService albumService;
-    private final Catalog catalog;
+    //private final Catalog catalog;
     private Player player;
     private TTrack TrackLoaded;
     private Image initialPictureTrack;
@@ -158,27 +158,15 @@ public class CatalogController {
     private GetPlayerCommand getPlayerCommand;
 
     @Autowired
-    public CatalogController(TrackService trackService, GenreService genreService, ArtistService artistService, PlaylistService playlistService, AlbumService albumService, Catalog catalog) {
+    public CatalogController(TrackService trackService, GenreService genreService, ArtistService artistService, PlaylistService playlistService, AlbumService albumService) {
         this.trackService = trackService;
         this.genreService = genreService;
         this.artistService = artistService;
         this.playlistService = playlistService;
         this.albumService = albumService;
-        this.catalog = catalog;
+        //this.catalog = Catalog.getInstance();
     }
 
-
-    /*
-    public static boolean showConfirmationDeleteDialog(boolean multi) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Confirmation de suppression");
-        if (multi) alert.setHeaderText("Voulez-vous vraiment supprimer ces enregistrements ?");
-        else alert.setHeaderText("Voulez-vous vraiment supprimer cet enregistrement ?");
-        Optional<ButtonType> result = alert.showAndWait();
-        return result.isPresent() && result.get() == ButtonType.OK;
-    }
-
-     */
 
     @FXML
     private void initialize() {
@@ -197,12 +185,12 @@ public class CatalogController {
         //On récupère l'image de la pochette vide
         initialPictureTrack = new Image(pictureTrack.getImage().getUrl());
         setupCatalogTableView();
-        this.catalog.initTrackWaiting();
+        Catalog.getInstance().initTrackWaiting();
         dataWaitingTrackList = FXCollections.observableArrayList(trackService.findByWaitingService(true));
         waitingTrackListView.setItems(dataWaitingTrackList);
         updateListViewStyle();
         playZone.setStyle("-fx-background-color: #e2e2e2;");
-        filter=new Filter(playlistComboBox, genreComboBox, artistComboBox, albumComboBox,trackService,searchField,catalog,this);
+        filter=new Filter(playlistComboBox, genreComboBox, artistComboBox, albumComboBox,trackService,searchField,this);
         filter.setup();
     }
 
@@ -227,7 +215,7 @@ public class CatalogController {
                     deleteTrackWaiting(track);
                 }
                 trackService.deleteTrackService(track);
-                catalog.removeTrack(track);
+                Catalog.getInstance().removeTrack(track);
                 catalogTableView.getSelectionModel().select(-1);
             }
         }
@@ -277,7 +265,7 @@ public class CatalogController {
             deleteTrackMenu.setDisable(true);
             modifyTrackMenu.setDisable(true);
         } else {
-            track = catalog.getTrackByIndex(index);
+            track = Catalog.getInstance().getTrackByIndex(index);
             AddListenedTrackListMenu.setDisable(track.getTrackWaiting());
             deleteTrackMenu.setDisable(false);
             modifyTrackMenu.setDisable(false);
@@ -510,7 +498,7 @@ public class CatalogController {
         this.albumColCatalogTableView.setCellValueFactory(new PropertyValueFactory<>("trackAlbumsAsString"));
         this.playlistColCatalogTableView.setCellValueFactory(new PropertyValueFactory<>("trackPlaylistsAsString"));
 
-        catalogTableView.setItems(catalog.getDataCatalogTable());
+        catalogTableView.setItems(Catalog.getInstance().getDataCatalogTable());
         catalogTableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         catalogTableView.setContextMenu(null);
         // Configuration du RowFactory pour la TableView
@@ -665,7 +653,7 @@ public class CatalogController {
 
     private void deleteTrackWaiting(TTrack track) {
         int countTrack;
-        catalog.activeTrack(track);
+        Catalog.getInstance().activeTrack(track);
         dataWaitingTrackList.remove(track);
         track.setTrackWaiting(false);
         trackService.saveTrackService(track);
@@ -783,7 +771,7 @@ public class CatalogController {
             if (this.remote.setCommand(getPlayerCommand).execute() != null && Objects.equals(this.status.getStatus(), STATUS.PLAYING.toString())) {
                 StopEvent();
             }
-            catalog.activeTrack(track);
+            Catalog.getInstance().activeTrack(track);
             track.setTrackWaiting(false);
             //trackService.saveTrackService(track);
         }
@@ -823,7 +811,7 @@ public class CatalogController {
                 trackPlaylist.add(newPlaylist);
                 track.setTrackPlaylistList(trackPlaylist);
                 trackService.saveTrackService(track);
-                this.catalog.modifyTrack(catalog.getIndex(track),track);
+                Catalog.getInstance().modifyTrack(Catalog.getInstance().getIndex(track),track);
             }
         }
         refreshTableView();
@@ -831,7 +819,7 @@ public class CatalogController {
 
     public void refreshTableView(){
         catalogTableView.refresh();
-        catalogTableView.setItems(this.catalog.getDataCatalogTable());
+        catalogTableView.setItems(Catalog.getInstance().getDataCatalogTable());
 
     }
 

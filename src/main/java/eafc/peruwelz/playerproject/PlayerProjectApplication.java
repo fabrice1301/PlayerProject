@@ -29,9 +29,9 @@ public class PlayerProjectApplication extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         CatalogController controller= context.getBean(CatalogController.class);
-        Catalog catalog= context.getBean(Catalog.class);
+        //Catalog catalog=Catalog.getInstance();
         controller.setPlayer(new MPlayer());
-        catalog.setCatalogController(controller);
+        Catalog.getInstance().setCatalogController(controller);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/CatalogView.fxml"));
         loader.setControllerFactory(context::getBean);
         Parent root=loader.load();
