@@ -5,7 +5,9 @@ import eafc.peruwelz.playerproject.repos.TAlbumRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AlbumService {
@@ -18,7 +20,10 @@ public class AlbumService {
     }
 
     public List<TAlbum> findAllAlbumService(){
-        return albumRepository.findAll();
+        return albumRepository.findAll()
+                .stream()
+                .sorted(Comparator.comparing(album -> album.getAlbumName().toLowerCase()))
+                .collect(Collectors.toList());
     }
 
     public void saveAlbumService(TAlbum album){

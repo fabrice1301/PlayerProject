@@ -6,8 +6,10 @@ import eafc.peruwelz.playerproject.repos.TPlaylistRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class PlaylistService {
@@ -20,7 +22,10 @@ public class PlaylistService {
     }
 
     public List<TPlaylist> findAllPlaylistService(){
-        return playlistRepository.findAll();
+        return playlistRepository.findAll()
+                .stream()
+                .sorted(Comparator.comparing(playlist -> playlist.getPlaylistName().toLowerCase()))
+                .collect(Collectors.toList());
     }
 
     public TPlaylist findByPlaylistIdService(String playlist){
@@ -35,15 +40,5 @@ public class PlaylistService {
         return playlist.getPlaylistTrackList();
     }
 
-
-
-    /*
-    @Transactional(readOnly = true)
-    public Set<TTrack> getTracksForPlaylist(Long playlistId) {
-        return playlistRepository.findByIdWithTracks(playlistId)
-                .map(TPlaylist::getPlaylistTrackList)
-                .orElse(Collections.emptySet());
-    }
-    */
 
 }

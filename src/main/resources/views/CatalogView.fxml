@@ -76,7 +76,7 @@
                                     <MenuItem fx:id="deleteTrackMenu" mnemonicParsing="false" onAction="#deleteTrackEvent" text="Supprimer" />
                                     <MenuItem fx:id="modifyTrackMenu" mnemonicParsing="false" onAction="#ModifyTrackEvent" text="Modifier" />
                                     <SeparatorMenuItem mnemonicParsing="false" />
-                                  <MenuItem fx:id="AddListenedTrackListMenu" disable="true" mnemonicParsing="false" onAction="#AddTrackWaitingListEvent" text="Ajouter la piste à la liste d'écoute" />
+                                  <MenuItem fx:id="AddListenedTrackListMenu" disable="true" mnemonicParsing="false" onAction="#AddTrackWaitingListEvent" text="Ajouter à la liste d'écoute" />
                                 </items>
                               </ContextMenu>
                            </contextMenu>
@@ -117,12 +117,12 @@
                <children>
                   <HBox prefHeight="70.0" prefWidth="374.0">
                      <children>
-                        <ComboBox fx:id="addPlaylistComboBox" editable="true" onMouseClicked="#SetupPlaylistComboBoxEvent" prefWidth="150.0">
+                        <ComboBox fx:id="addPlaylistComboBox" disable="true" editable="true" onMouseClicked="#SetupPlaylistComboBoxEvent" prefWidth="150.0">
                            <HBox.margin>
                               <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                            </HBox.margin>
                         </ComboBox>
-                        <Button fx:id="addPlaylistBtn" mnemonicParsing="false" onAction="#addPlaylistEvent" text="Ajouter">
+                        <Button fx:id="addPlaylistBtn" disable="true" mnemonicParsing="false" onAction="#addPlaylistEvent" text="Ajouter">
                            <HBox.margin>
                               <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                            </HBox.margin>

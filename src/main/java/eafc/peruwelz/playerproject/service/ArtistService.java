@@ -22,7 +22,7 @@ public class ArtistService {
     public List<TArtist> findAllArtistService(){
         return artistRepository.findAll()
                 .stream()
-                .sorted(Comparator.comparing(TArtist::getArtistName))
+                .sorted(Comparator.comparing(artist -> artist.getArtistName().toLowerCase()))
                 .collect(Collectors.toList());
     }
 

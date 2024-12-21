@@ -385,24 +385,35 @@ public class TrackController {
 
     @FXML
     private void AddGenreEvent(){
-        genre=new TGenre();
-        genre.setGenreName(genreNameField.getText());
-        //genre.setGenreDeleted(false);
-        genreService.saveGenreService(genre);
-        dataGenreTable.add(new GenreModelSelection(genre, false));
+        if (!genreNameField.getText().isEmpty() && genreNameField.getText().trim()!="") {
+            genre = new TGenre();
+            genre.setGenreName(genreNameField.getText());
+            genreService.saveGenreService(genre);
+            List<TGenre> listGenre=genreService.findAllGenreService();
+            this.dataGenreTable.clear();
+            for (TGenre genre:listGenre){
+                dataGenreTable.add(new GenreModelSelection(genre,false));
+            }
+            genreTableView.refresh();
+            genreNameField.setText("");
+        }
     }
 
     @FXML
     private void AddArtistEvent(){
-        artist=new TArtist();
-        artist.setArtistName(artistNameField.getText());
-        artistService.saveArtistService(artist);
-        List<TArtist> listArtist=artistService.findAllArtistService();
-        dataArtistTable.clear();
-        for (TArtist artist:listArtist){
-            dataArtistTable.add(new ArtistModelSelection(artist,false));
+        if (!artistNameField.getText().isEmpty() && artistNameField.getText().trim()!=""){
+            artist=new TArtist();
+            artist.setArtistName(artistNameField.getText());
+            artistService.saveArtistService(artist);
+            List<TArtist> listArtist=artistService.findAllArtistService();
+            dataArtistTable.clear();
+            for (TArtist artist:listArtist){
+                dataArtistTable.add(new ArtistModelSelection(artist,false));
+            }
+            artistTableView.refresh();
+            artistNameField.setText("");
         }
-        artistTableView.refresh();
+
     }
 
     @FXML

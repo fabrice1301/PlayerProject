@@ -181,7 +181,7 @@ public class CatalogController {
     }
 
 
-
+    /*
     public static boolean showConfirmationDeleteDialog(boolean multi) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Confirmation de suppression");
@@ -190,6 +190,8 @@ public class CatalogController {
         Optional<ButtonType> result = alert.showAndWait();
         return result.isPresent() && result.get() == ButtonType.OK;
     }
+
+     */
 
     @FXML
     private void initialize() {
@@ -215,10 +217,6 @@ public class CatalogController {
         playZone.setStyle("-fx-background-color: #e2e2e2;");
         filter=new Filter(playlistComboBox, genreComboBox, artistComboBox, albumComboBox,trackService,searchField,catalog,this);
         filter.setup();
-        //SetupPlaylistComboBoxEvent();
-        addPlaylistComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            System.out.println(newValue);
-        });
     }
 
     public void setPlayer(Player player){
@@ -254,7 +252,6 @@ public class CatalogController {
         try{
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/AddTrackView.fxml"));
             loader.setControllerFactory(context::getBean);
-            //context.getBean(CatalogController.class);
             Parent root = loader.load();
             TrackController controller = loader.getController();
             controller.setUpdate(false);
@@ -577,17 +574,26 @@ public class CatalogController {
         albumComboBox=filter.reloadAlbum();
     }
 
+
     @FXML
     private void AddTrackWaitingListEvent() {
+
         ObservableList<TTrack> list = catalogTableView.getSelectionModel().getSelectedItems();
         for (TTrack track : list) {
             if (!track.getTrackWaiting()) {
                 dataWaitingTrackList.add(track);
                 track.setTrackWaiting(true);
                 trackService.saveTrackService(track);
+                addPlaylistComboBox.setDisable(false);
+                addPlaylistBtn.setDisable(false);
             }
         }
         nextBtn.setDisable(false);
+
+
+
+
+
     }
 
     @FXML
@@ -685,6 +691,10 @@ public class CatalogController {
             NextEvent(false);
         }
         else updateListViewStyle();
+        if (countTrack==0){
+            addPlaylistComboBox.setDisable(true);
+            addPlaylistBtn.setDisable(true);
+        }
     }
 
     @FXML
@@ -792,6 +802,8 @@ public class CatalogController {
         dataWaitingTrackList.clear();
         initPlayZone();
         TrackLoaded = null;
+        addPlaylistComboBox.setDisable(true);
+        addPlaylistBtn.setDisable(true);
     }
 
     public void addCatalogWaitingListEvent(){
@@ -799,7 +811,8 @@ public class CatalogController {
             if (!track.getTrackWaiting()) {
                 dataWaitingTrackList.add(track);
                 track.setTrackWaiting(true);
-                //trackService.saveTrackService(track);
+                addPlaylistComboBox.setDisable(false);
+                addPlaylistBtn.setDisable(false);
             }
         }
         nextBtn.setDisable(false);
