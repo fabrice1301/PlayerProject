@@ -20,7 +20,6 @@ public class Filter {
     private ComboBox genreComboBox;
     private ComboBox artistComboBox;
     private ComboBox albumComboBox;
-    private TrackService trackService;
     private TextField searchField;
     private String playlistFilter = null;
     private String genreFilter = null;
@@ -28,17 +27,19 @@ public class Filter {
     private String albumFilter = null;
     private String textFilter = null;
     public static Filter filterInstance;
+    private final TrackService trackService;
+    private final Catalog catalog;
 
-    public Filter(ComboBox playlist, ComboBox genre, ComboBox artist, ComboBox album, TrackService trackService,TextField searchField, CatalogController catalogController){
-
+    public Filter(ComboBox playlist, ComboBox genre, ComboBox artist, ComboBox album,TextField searchField,TrackService trackService, CatalogController catalogController,Catalog catalog){
         this.playlistComboBox=playlist;
         this.albumComboBox=album;
         this.artistComboBox=artist;
         this.genreComboBox=genre;
-        this.trackService=trackService;
         this.searchField=searchField;
-        List<TTrack> trackList = this.trackService.findAllTrackService();
-        Catalog.getInstance().setDataCatalogTable(trackList);
+        this.trackService=trackService;
+        this.catalog=catalog;
+        List<TTrack> trackList = trackService.findAllTrackService();
+        this.catalog.setDataCatalogTable(trackList);
         Filter.filterInstance=this;
     }
 
@@ -83,7 +84,7 @@ public class Filter {
 
     public ComboBox reloadAlbum() {
         data = FXCollections.observableArrayList(
-                Catalog.getInstance().getDataCatalogTable().stream()
+                this.catalog.getDataCatalogTable().stream()
                         .flatMap(track -> track.getTrackAlbumList().stream()
                                 .map(TAlbum::getAlbumName))
                         .distinct()
@@ -97,7 +98,7 @@ public class Filter {
 
     public ComboBox reloadGenre() {
         data = FXCollections.observableArrayList(
-                Catalog.getInstance().getDataCatalogTable().stream()
+                this.catalog.getDataCatalogTable().stream()
                         .flatMap(track -> track.getTrackGenreList().stream()
                                 .map(TGenre::getGenreName))
                         .distinct()
@@ -111,7 +112,7 @@ public class Filter {
 
     public ComboBox reloadArtist() {
         data = FXCollections.observableArrayList(
-                Catalog.getInstance().getDataCatalogTable().stream()
+                this.catalog.getDataCatalogTable().stream()
                         .flatMap(track -> track.getTrackArtistList().stream()
                                 .map(TArtist::getArtistName))
                         .distinct()
@@ -125,7 +126,7 @@ public class Filter {
 
     public ComboBox reloadPlaylist() {
         data = FXCollections.observableArrayList(
-                Catalog.getInstance().getDataCatalogTable().stream()
+                this.catalog.getDataCatalogTable().stream()
                         .flatMap(track -> track.getTrackPlaylistList().stream()
                                 .map(TPlaylist::getPlaylistName))
                         .distinct()
@@ -153,7 +154,7 @@ public class Filter {
                     return matchesPlaylist && matchesGenre && matchesAlbum && matchesArtist && matchesSearchField;
                 })
                 .collect(Collectors.toList());
-        Catalog.getInstance().setDataCatalogTable(filteredTracks);
+        this.catalog.setDataCatalogTable(filteredTracks);
     }
 
 }

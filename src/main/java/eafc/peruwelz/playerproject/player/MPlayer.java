@@ -1,14 +1,22 @@
 package eafc.peruwelz.playerproject.player;
 
 
+import eafc.peruwelz.playerproject.Class.StatusPlayer;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 
-
+@Component
 public class MPlayer implements Player {
+
+    private StatusPlayer statusPlayer;
+
     private MediaPlayer mediaPlayer;
     private enum STATUS {PLAYING, STOPPED, PAUSED}
 
@@ -46,21 +54,12 @@ public class MPlayer implements Player {
 
     @Override
     public Object getStatus() {
-        int status;
-        switch (mediaPlayer.getStatus()){
-            case PLAYING -> {
-                return STATUS.PLAYING;
-            }
-            case STOPPED -> {
-                return STATUS.STOPPED;
-            }
-            case PAUSED -> {
-                return STATUS.PAUSED;
-            }
-            default -> {
-                return null;
-            }
-        }
+        return StatusPlayer.getIntance().getStatus();
+    }
+
+    @Override
+    public void setStatus(String status) {
+        StatusPlayer.getIntance().setStatus(status);
     }
 
     @Override

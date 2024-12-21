@@ -13,12 +13,11 @@ import java.util.List;
 public class TrackService {
 
     private final TTrackRepository trackRepository;
-    public static TrackService trackServiceInstance;
+
 
     @Autowired
     public TrackService(TTrackRepository trackRepository) {
         this.trackRepository = trackRepository;
-        TrackService.trackServiceInstance=this;
     }
 
     public void deleteTrackService(TTrack track){

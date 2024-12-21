@@ -42,7 +42,7 @@ public class CatalogController {
     private final ArtistService artistService;
     private final PlaylistService playlistService;
     private final AlbumService albumService;
-    //private final Catalog catalog;
+    private final Catalog catalog;
     private Player player;
     private TTrack TrackLoaded;
     private Image initialPictureTrack;
@@ -51,7 +51,7 @@ public class CatalogController {
     private Integer index = -1;
     private Double volume = 0.5;
     private enum STATUS {PLAYING, STOPPED, PAUSED, UNKNOW}
-    //private StatusPlayer status;
+    private StatusPlayer status;
     private Boolean randomState = false;
     private Boolean reloadState = false;
     private String style1 = "-fx-background-color: #c5fca9; -fx-text-fill: black;";
@@ -149,6 +149,7 @@ public class CatalogController {
     private PauseCommand pauseCommand;
     private StopCommand stopCommand;
     private GetStatusCommand getStatusCommand;
+    private SetStatusCommand setStatusCommand;
     private SetVolumeCommand setVolumeCommand;
     private GetCurrentTimeCommand getCurrentTimeCommand;
     private GetTotalDurationCommand getTotalDurationCommand;
@@ -158,13 +159,15 @@ public class CatalogController {
     private GetPlayerCommand getPlayerCommand;
 
     @Autowired
-    public CatalogController(TrackService trackService, GenreService genreService, ArtistService artistService, PlaylistService playlistService, AlbumService albumService) {
+    public CatalogController(TrackService trackService,GenreService genreService, ArtistService artistService, PlaylistService playlistService, AlbumService albumService,Catalog catalog) {
         this.trackService = trackService;
         this.genreService = genreService;
         this.artistService = artistService;
         this.playlistService = playlistService;
         this.albumService = albumService;
-        //this.catalog = Catalog.getInstance();
+        this.catalog = catalog;
+
+
     }
 
 
@@ -185,18 +188,20 @@ public class CatalogController {
         //On récupère l'image de la pochette vide
         initialPictureTrack = new Image(pictureTrack.getImage().getUrl());
         setupCatalogTableView();
-        Catalog.getInstance().initTrackWaiting();
+        this.catalog.initTrackWaiting();
         dataWaitingTrackList = FXCollections.observableArrayList(trackService.findByWaitingService(true));
         waitingTrackListView.setItems(dataWaitingTrackList);
         updateListViewStyle();
         playZone.setStyle("-fx-background-color: #e2e2e2;");
-        filter=new Filter(playlistComboBox, genreComboBox, artistComboBox, albumComboBox,trackService,searchField,this);
+        filter=new Filter(playlistComboBox, genreComboBox, artistComboBox, albumComboBox,searchField,trackService,this,this.catalog);
         filter.setup();
     }
 
     public void setPlayer(Player player){
         this.player=player;
+        //this.status=new StatusPlayer();
     }
+
 
 
     @FXML
@@ -215,7 +220,7 @@ public class CatalogController {
                     deleteTrackWaiting(track);
                 }
                 trackService.deleteTrackService(track);
-                Catalog.getInstance().removeTrack(track);
+                this.catalog.removeTrack(track);
                 catalogTableView.getSelectionModel().select(-1);
             }
         }
@@ -265,7 +270,7 @@ public class CatalogController {
             deleteTrackMenu.setDisable(true);
             modifyTrackMenu.setDisable(true);
         } else {
-            track = Catalog.getInstance().getTrackByIndex(index);
+            track = this.catalog.getTrackByIndex(index);
             AddListenedTrackListMenu.setDisable(track.getTrackWaiting());
             deleteTrackMenu.setDisable(false);
             modifyTrackMenu.setDisable(false);
@@ -287,13 +292,13 @@ public class CatalogController {
     @FXML
     private void PlayEvent() {
         if (this.remote.setCommand(getPlayerCommand).execute() != null) {
-            if (Objects.equals(StatusPlayer.getInstance().getStatus(), STATUS.PLAYING.toString())) {
+            if (Objects.equals(this.remote.setCommand(getStatusCommand).execute(), STATUS.PLAYING.toString())) {
                 this.remote.setCommand(pauseCommand).execute();
-                StatusPlayer.getInstance().setStatus(STATUS.PAUSED.toString());
+                this.remote.setCommand(new SetStatusCommand(this.player,STATUS.PAUSED.toString())).execute();
                 timer.stop();
             } else {
                 this.remote.setCommand(playCommand).execute();
-                StatusPlayer.getInstance().setStatus(STATUS.PLAYING.toString());
+                this.remote.setCommand(new SetStatusCommand(this.player,STATUS.PLAYING.toString())).execute();
                 timer.start();
             }
             switchPictureBtnPlay();
@@ -305,7 +310,7 @@ public class CatalogController {
         if (this.remote.setCommand(getPlayerCommand).execute() != null) {
             timer.stop();
             this.remote.setCommand(stopCommand).execute();
-            StatusPlayer.getInstance().setStatus(STATUS.STOPPED.toString());
+            this.remote.setCommand(new SetStatusCommand(this.player,STATUS.STOPPED.toString())).execute();
             timer.stop(); // Arrêter le timer
             seekSlider.setValue(0); // Réinitialiser le Slider
             String imagePath = getClass().getResource("/images/play.png").toExternalForm();
@@ -369,7 +374,7 @@ public class CatalogController {
 
     private void switchPictureBtnPlay() {
         if (this.remote.setCommand(getPlayerCommand).execute() != null) {
-            if (StatusPlayer.getInstance().getStatus().equals(STATUS.PAUSED.toString())) {
+            if (this.remote.setCommand(getStatusCommand).execute().equals(STATUS.PAUSED.toString())) {
                 String imagePath = getClass().getResource("/images/play.png").toExternalForm();
                 Image image = new Image(imagePath);
                 picturePlayBtn.setImage(image);
@@ -386,7 +391,7 @@ public class CatalogController {
         TTrack newTrack;
         String previousStatus;
         if (this.remote.setCommand(getPlayerCommand).execute() != null) {
-            previousStatus= StatusPlayer.getInstance().getStatus();
+            previousStatus= this.remote.setCommand(getStatusCommand).execute().toString();
             if ((Double) this.remote.setCommand(getCurrentTimeCommand).execute() < 3 && this.index>0) this.index -= 1;
             this.remote.setCommand(stopCommand).execute();
             newTrack = dataWaitingTrackList.get(this.index);
@@ -408,7 +413,7 @@ public class CatalogController {
         TTrack newTrack;
         int index=this.index;
         int countTrack = waitingTrackListView.getItems().size();
-        String previousStatus= StatusPlayer.getInstance().getStatus();
+        String previousStatus= this.remote.setCommand(getStatusCommand).execute().toString();
 
         if (!btn){
             TrackLoaded.setTrackCount(TrackLoaded.getTrackCount()+1);
@@ -498,7 +503,7 @@ public class CatalogController {
         this.albumColCatalogTableView.setCellValueFactory(new PropertyValueFactory<>("trackAlbumsAsString"));
         this.playlistColCatalogTableView.setCellValueFactory(new PropertyValueFactory<>("trackPlaylistsAsString"));
 
-        catalogTableView.setItems(Catalog.getInstance().getDataCatalogTable());
+        catalogTableView.setItems(this.catalog.getDataCatalogTable());
         catalogTableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         catalogTableView.setContextMenu(null);
         // Configuration du RowFactory pour la TableView
@@ -594,10 +599,10 @@ public class CatalogController {
             //On récupère la piste sélectionnée dans le catalogue
             if (newIndex != -1) this.index = newIndex;
             newTrack = dataWaitingTrackList.get(this.index);
-            if(StatusPlayer.getInstance().getStatus()!=STATUS.STOPPED.toString() && StatusPlayer.getInstance().getStatus()!=STATUS.UNKNOW.toString())
+            if(this.remote.setCommand(getStatusCommand).execute()!=STATUS.STOPPED.toString() && this.remote.setCommand(getStatusCommand).execute()!=STATUS.UNKNOW.toString())
             {
                 this.remote.setCommand(stopCommand).execute();
-                StatusPlayer.getInstance().setStatus(STATUS.STOPPED.toString());
+                this.remote.setCommand(new SetStatusCommand(this.player,STATUS.STOPPED.toString())).execute();
             }
             loadTrack(newTrack);
             PlayEvent();
@@ -653,7 +658,7 @@ public class CatalogController {
 
     private void deleteTrackWaiting(TTrack track) {
         int countTrack;
-        Catalog.getInstance().activeTrack(track);
+        this.catalog.activeTrack(track);
         dataWaitingTrackList.remove(track);
         track.setTrackWaiting(false);
         trackService.saveTrackService(track);
@@ -768,10 +773,10 @@ public class CatalogController {
     private void emptyWaitingEvent() {
 
         for (TTrack track : dataWaitingTrackList) {
-            if (this.remote.setCommand(getPlayerCommand).execute() != null && Objects.equals(StatusPlayer.getInstance().getStatus(), STATUS.PLAYING.toString())) {
+            if (this.remote.setCommand(getPlayerCommand).execute() != null && Objects.equals(this.remote.setCommand(getStatusCommand).execute(), STATUS.PLAYING.toString())) {
                 StopEvent();
             }
-            Catalog.getInstance().activeTrack(track);
+            this.catalog.activeTrack(track);
             track.setTrackWaiting(false);
             //trackService.saveTrackService(track);
         }
@@ -811,7 +816,7 @@ public class CatalogController {
                 trackPlaylist.add(newPlaylist);
                 track.setTrackPlaylistList(trackPlaylist);
                 trackService.saveTrackService(track);
-                Catalog.getInstance().modifyTrack(Catalog.getInstance().getIndex(track),track);
+                this.catalog.modifyTrack(this.catalog.getIndex(track),track);
             }
         }
         refreshTableView();
@@ -819,7 +824,7 @@ public class CatalogController {
 
     public void refreshTableView(){
         catalogTableView.refresh();
-        catalogTableView.setItems(Catalog.getInstance().getDataCatalogTable());
+        catalogTableView.setItems(this.catalog.getDataCatalogTable());
 
     }
 

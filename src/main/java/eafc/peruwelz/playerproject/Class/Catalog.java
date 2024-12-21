@@ -11,28 +11,23 @@ import java.util.Comparator;
 import java.util.List;
 
 
-
+@Component
 public class Catalog {
 
     private ObservableList<TTrack> dataCatalogTable;
     private CatalogController catalogController;
-    //private final TrackService trackService;
-    private static Catalog instance;
+    private final TrackService trackService;
 
-    private Catalog(){
+    @Autowired
+    public Catalog(TrackService trackService){
         this.dataCatalogTable=FXCollections.observableArrayList();
-        //this.trackService=trackService;
+        this.trackService=trackService;
 
-        List<TTrack> trackList = TrackService.trackServiceInstance.findAllTrackService();
+        List<TTrack> trackList = trackService.findAllTrackService();
         this.dataCatalogTable.addAll(trackList);
     }
 
-    public static Catalog getInstance(){
-        if (instance==null){
-            instance=new Catalog();
-        }
-        return instance;
-    }
+
 
     public void setCatalogController(CatalogController catalogController){
         this.catalogController=catalogController;
@@ -86,7 +81,7 @@ public class Catalog {
     public void initTrackWaiting(){
         for(TTrack track:this.dataCatalogTable){
             track.setTrackWaiting(false);
-            TrackService.trackServiceInstance.saveTrackService(track);
+            this.trackService.saveTrackService(track);
 
         }
     }

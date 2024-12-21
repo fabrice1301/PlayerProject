@@ -49,12 +49,12 @@ public class TrackController {
     private TArtist artist;
     private TPlaylist playlist;
     private TAlbum album;
-    private TrackService trackService;
+    private final TrackService trackService;
     private GenreService genreService;
     private ArtistService artistService;
     private PlaylistService playlistService;
     private AlbumService albumService;
-    //private Catalog catalog;
+    private final Catalog catalog;
     private File file;
     private File picture;
     private String trackPathPicture;
@@ -145,14 +145,14 @@ public class TrackController {
     private TableColumn<AlbumModelSelection, String> albumNameCol;
 
     @Autowired
-    public TrackController(TrackService trackService, GenreService genreService, ArtistService artistService, PlaylistService playlistService, AlbumService albumService,CatalogController catalogController){
-        this.trackService=trackService;
+    public TrackController(TrackService trackService,GenreService genreService, ArtistService artistService, PlaylistService playlistService, AlbumService albumService,CatalogController catalogController, Catalog catalog){
         this.genreService=genreService;
         this.artistService=artistService;
         this.playlistService=playlistService;
         this.albumService=albumService;
-        //this.catalog = Catalog.getInstance();
+        this.catalog = catalog;
         this.catalogController=catalogController;
+        this.trackService=trackService;
     }
 
     @FXML
@@ -452,11 +452,11 @@ public class TrackController {
         if (this.dateTrack!=null) track.setTrackDate(this.dateTrack.getValue());
 
         //On sauve la piste avec ses propriétés
-        this.trackService.saveTrackService(this.track);
+        trackService.saveTrackService(this.track);
 
-        if (!this.update) Catalog.getInstance().addTrack(this.track);
-        else Catalog.getInstance().modifyTrack(Catalog.getInstance().getIndex(track),track);
-        Catalog.getInstance().sortCatalog();
+        if (!this.update) this.catalog.addTrack(this.track);
+        else this.catalog.modifyTrack(this.catalog.getIndex(track),track);
+        this.catalog.sortCatalog();
         CancelEvent();
     }
 

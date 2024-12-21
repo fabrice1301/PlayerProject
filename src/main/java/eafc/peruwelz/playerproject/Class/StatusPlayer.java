@@ -1,5 +1,8 @@
 package eafc.peruwelz.playerproject.Class;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 public class StatusPlayer {
     private enum STATUS {PLAYING, STOPPED, PAUSED, UNKNOW}
     private STATUS status;
@@ -9,8 +12,8 @@ public class StatusPlayer {
         status=STATUS.UNKNOW;
     }
 
-    public static StatusPlayer getInstance(){
-        if(instance==null){
+    public static StatusPlayer getIntance(){
+        if (instance==null){
             instance=new StatusPlayer();
         }
         return instance;
@@ -23,5 +26,4 @@ public class StatusPlayer {
     public void setStatus(String status){
         this.status = STATUS.valueOf(status.toUpperCase());
     }
-
 }
