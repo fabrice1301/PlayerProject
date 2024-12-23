@@ -818,6 +818,7 @@ public class CatalogController {
             }
         }
         refreshTableView();
+        addPlaylistComboBox.getSelectionModel().select(-1);
     }
 
     public void refreshTableView(){
