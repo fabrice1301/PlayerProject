@@ -19,14 +19,12 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -230,7 +228,7 @@ public class CatalogController {
     @FXML
     private void addTrackEvent() throws IOException {
         try{
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/AddTrackView.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/TrackView.fxml"));
             loader.setControllerFactory(context::getBean);
             Parent root = loader.load();
             TrackController controller = loader.getController();
@@ -247,7 +245,7 @@ public class CatalogController {
 
     @FXML
     private void ModifyTrackEvent() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/AddTrackView.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/TrackView.fxml"));
         loader.setControllerFactory(context::getBean);
         Parent root = loader.load();
         TrackController controller = loader.getController();

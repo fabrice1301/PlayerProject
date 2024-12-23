@@ -12,13 +12,9 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 
-@Component
+
 public class MPlayer implements Player {
-
-    private StatusPlayer statusPlayer;
-
     private MediaPlayer mediaPlayer;
-    private enum STATUS {PLAYING, STOPPED, PAUSED}
 
     @Override
     public Object getInstance() {

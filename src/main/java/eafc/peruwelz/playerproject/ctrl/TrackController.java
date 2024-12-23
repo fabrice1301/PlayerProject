@@ -10,6 +10,8 @@ import eafc.peruwelz.playerproject.modelControl.ArtistModelSelection;
 import eafc.peruwelz.playerproject.modelControl.GenreModelSelection;
 import eafc.peruwelz.playerproject.modelControl.PlaylistModelSelection;
 import eafc.peruwelz.playerproject.service.*;
+import eafc.peruwelz.playerproject.validation.StringValidation;
+import eafc.peruwelz.playerproject.validation.ValidationManager;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -35,6 +37,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.*;
 
 @Controller
@@ -64,6 +67,9 @@ public class TrackController {
     private DatePicker dateTrack;
 
     @FXML
+    private Button saveTrackBtn;
+
+    @FXML
     private Button cancelBtn;
 
     @FXML
@@ -71,6 +77,21 @@ public class TrackController {
 
     @FXML
     private Button searchPictureTrackBtn;
+
+    @FXML
+    private Button addGenreBtn;
+
+    @FXML
+    private Button addAlbumBtn;
+
+    @FXML
+    private Button addArtistBtn;
+
+    @FXML
+    private Button addPlaylistBtn;
+
+    @FXML
+    private Button trashPictureBtn;
 
     @FXML
     private TextField trackPathField;
@@ -145,7 +166,7 @@ public class TrackController {
     private TableColumn<AlbumModelSelection, String> albumNameCol;
 
     @Autowired
-    public TrackController(TrackService trackService,GenreService genreService, ArtistService artistService, PlaylistService playlistService, AlbumService albumService,CatalogController catalogController, Catalog catalog){
+    public TrackController(TrackService trackService, GenreService genreService, ArtistService artistService, PlaylistService playlistService, AlbumService albumService, CatalogController catalogController, Catalog catalog){
         this.genreService=genreService;
         this.artistService=artistService;
         this.playlistService=playlistService;
@@ -157,11 +178,41 @@ public class TrackController {
 
     @FXML
     private void initialize(){
+        StringValidation stringValidation =
+                new StringValidation("max. 255 caractères",true);
+        stringValidation
+                .setMaxLength(255)
+                .setRegularExp(".*");
+        ValidationManager.getInstance().setValidation(trackTitleField,stringValidation);
+        ValidationManager.getInstance().setValidation(trackPathField,stringValidation);
+        StringValidation stringValidation2 =
+                new StringValidation("max. 255 caractères",false);
+        stringValidation
+                .setMaxLength(255)
+                .setRegularExp(".*");
+        ValidationManager.getInstance().setValidation(trackPathPictureField,stringValidation2);
+        ValidationManager.getInstance().setSubmitButton(saveTrackBtn,trackTitleField,trackPathField,trackPathPictureField);
+
+        StringValidation stringValidation3 =
+                new StringValidation("max. 50 caractères",false);
+        stringValidation3
+                .setMaxLength(50)
+                .setRegularExp(".*");
+        ValidationManager.getInstance().setValidation(genreNameField,stringValidation3);
+        ValidationManager.getInstance().setValidation(albumNameField,stringValidation3);
+        ValidationManager.getInstance().setValidation(artistNameField,stringValidation3);
+        ValidationManager.getInstance().setValidation(playlistNameField,stringValidation3);
+        ValidationManager.getInstance().setSubmitButton(addGenreBtn,genreNameField);
+        ValidationManager.getInstance().setSubmitButton(addAlbumBtn,albumNameField);
+        ValidationManager.getInstance().setSubmitButton(addArtistBtn,artistNameField);
+        ValidationManager.getInstance().setSubmitButton(addPlaylistBtn,playlistNameField);
+
 
         trackToModify=new TTrack();
         //Ajoute la loupe dans les boutons de recherche
-        searchTrackBtn.setText("\uD83D\uDD0D " + searchTrackBtn.getText());
-        searchPictureTrackBtn.setText("\uD83D\uDD0D " + searchPictureTrackBtn.getText());
+        searchTrackBtn.setText("\uD83D\uDD0D");
+        searchPictureTrackBtn.setText("\uD83D\uDD0D");
+        trashPictureBtn.setText("\uD83D\uDDD1");
         this.trackPathPicture=null;
 
         //Gestion des artistes
@@ -249,7 +300,7 @@ public class TrackController {
             }
         });
 
-// Gestion des albums
+    // Gestion des albums
         this.selectedAlbumCol.setCellValueFactory(new PropertyValueFactory<>("selected"));
         this.selectedAlbumCol.setCellFactory(tc -> new CheckBoxTableCell<>());
         this.albumNameCol.setCellValueFactory(cellData ->
@@ -340,15 +391,14 @@ public class TrackController {
             this.update=update;
             this.trackToModify=track;
             trackPathField.setText(this.trackToModify.getTrackPath());
-            System.out.println(track.getTrackPath());
-            System.out.println(trackToModify.getTrackPath());
             trackTitleField.setText(this.trackToModify.getTrackTitle());
             dateTrack.setValue(this.trackToModify.getTrackDate());
-            if (trackToModify.getTrackPicture()!=null){
-                trackPathPicture=this.trackToModify.getTrackPicture();
-                Image image=new Image(trackPathPicture);
-                trackPicture.setImage(image);
+            if (trackToModify.getTrackPicture()==null){
+                trackPicture.setImage(new Image(getClass().getResource("/images/vide.jpg").toExternalForm()));}
+            else {
+                trackPicture.setImage(new Image(trackToModify.getTrackPicture()));
             }
+
 
             Set<TGenre> listGenre=this.trackToModify.getTrackGenreList();
             for (GenreModelSelection genre : dataGenreTable){
@@ -448,6 +498,7 @@ public class TrackController {
 
         //On récupère l'adresse de la pochette si elle existe
         if (this.trackPathPicture!=null) track.setTrackPicture(this.trackPathPicture);
+        else {track.setTrackPicture(null);}
 
         if (this.dateTrack!=null) track.setTrackDate(this.dateTrack.getValue());
 
@@ -598,4 +649,21 @@ public class TrackController {
         Optional<ButtonType> result = alert.showAndWait();
         return result.isPresent() && result.get() == ButtonType.OK;
     }
+        @FXML
+        private void TrashPictureEvent(){
+            String path=getClass().getResource("/images/vide.jpg").toExternalForm();
+            trackPathPictureField.setText("");
+            trackPicture.setImage(new Image(getClass().getResource("/images/vide.jpg").toExternalForm()));
+            //trackToModify.setTrackPicture(path);
+        }
+
+        private void loadPictureTrack(String path) {
+            //trackPathPicture = getClass().getResource(path).toExternalForm();
+            //Image image=new Image(getClass().getResource(path).toExternalForm());
+            trackPicture.setImage(new Image(getClass().getResource(path).toExternalForm()));
+        }
+
+
 }
+
+

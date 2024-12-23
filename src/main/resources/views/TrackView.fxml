@@ -87,8 +87,13 @@
                               <Insets right="10.0" />
                            </HBox.margin>
                         </ImageView>
-                        <TextField fx:id="trackPathPictureField" />
+                        <TextField fx:id="trackPathPictureField" editable="false" />
                         <Button fx:id="searchPictureTrackBtn" contentDisplay="CENTER" mnemonicParsing="false" onAction="#searchPictureTrackEvent">
+                           <HBox.margin>
+                              <Insets left="10.0" />
+                           </HBox.margin>
+                        </Button>
+                        <Button fx:id="trashPictureBtn" mnemonicParsing="false" onAction="#TrashPictureEvent">
                            <HBox.margin>
                               <Insets left="10.0" />
                            </HBox.margin>
@@ -98,10 +103,10 @@
                         <Insets top="10.0" />
                      </padding>
                   </HBox>
-                  <VBox prefHeight="200.0" prefWidth="100.0">
+                  <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0">
                      <children>
                         <Label text="Date de sortie :" />
-                        <DatePicker fx:id="dateTrack" />
+                        <DatePicker fx:id="dateTrack" editable="false" />
                      </children>
                      <padding>
                         <Insets left="10.0" top="10.0" />
@@ -154,7 +159,7 @@
                                     <Insets top="5.0" />
                                  </HBox.margin>
                               </TextField>
-                              <Button fx:id="addGenreBtn" mnemonicParsing="false" onAction="#AddGenreEvent" prefWidth="30.0" text="+">
+                              <Button fx:id="addGenreBtn" disable="true" mnemonicParsing="false" onAction="#AddGenreEvent" prefWidth="30.0" text="+">
                                  <HBox.margin>
                                     <Insets left="10.0" top="5.0" />
                                  </HBox.margin>
@@ -270,12 +275,12 @@
       </HBox>
       <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
          <children>
-            <Button fx:id="saveTrackBtn" mnemonicParsing="false" onAction="#saveTrackEvent" text="Enregistrer">
+            <Button fx:id="saveTrackBtn" defaultButton="true" mnemonicParsing="false" onAction="#saveTrackEvent" prefWidth="100.0" text="Enregistrer">
                <HBox.margin>
                   <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                </HBox.margin>
             </Button>
-            <Button fx:id="cancelBtn" mnemonicParsing="false" onAction="#CancelEvent" text="Quitter">
+            <Button fx:id="cancelBtn" defaultButton="true" mnemonicParsing="false" onAction="#CancelEvent" prefWidth="100.0" text="Quitter">
                <HBox.margin>
                   <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                </HBox.margin>
