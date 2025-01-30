@@ -14,155 +14,138 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eafc.peruwelz.playerproject.ctrl.CatalogController">
-   <children>
-      <HBox alignment="TOP_CENTER" prefHeight="760.0" prefWidth="1250.0">
-          <children>
-              <VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="876.0">
-                  <children>
-                      <HBox alignment="CENTER" prefHeight="66.0" prefWidth="858.0">
-                          <padding>
-                              <Insets bottom="30.0" top="20.0" />
-                          </padding>
-                          <children>
-                              <TextField fx:id="searchField" promptText="Rechercher...">
-                                  <HBox.margin>
-                                      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                  </HBox.margin>
-                              </TextField>
-                              <ComboBox fx:id="genreComboBox" onMouseClicked="#reloadGenreFilter" prefWidth="150.0" promptText="Genre">
-                                  <HBox.margin>
-                                      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                  </HBox.margin>
-                              </ComboBox>
-                              <ComboBox fx:id="artistComboBox" onMouseClicked="#reloadArtistFilter" prefWidth="150.0" promptText="Artist">
-                                  <HBox.margin>
-                                      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                  </HBox.margin>
-                              </ComboBox>
-                              <ComboBox fx:id="albumComboBox" onMouseClicked="#reloadAlbumFilter" prefWidth="150.0" promptText="Album">
-                                  <HBox.margin>
-                                      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                  </HBox.margin>
-                              </ComboBox>
-                              <ComboBox fx:id="playlistComboBox" onMouseClicked="#reloadPlaylistFilter" prefWidth="150.0" promptText="Playlist">
-                                  <HBox.margin>
-                                      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                  </HBox.margin>
-                              </ComboBox>
-                          </children>
-                      </HBox>
-                      <HBox alignment="CENTER" prefHeight="600.0" prefWidth="900.0">
-                          <children>
-                              <TableView fx:id="catalogTableView" editable="true" minHeight="-Infinity" prefHeight="600.0" prefWidth="840.0">
-                                  <columns>
-                                      <TableColumn fx:id="titleColCatalogTableView" editable="false" maxWidth="500.0" minWidth="200.0" prefWidth="207.9999801516533" text="Titre" />
-                                      <TableColumn fx:id="timeColCatalogTableView" editable="false" prefWidth="59.19999694824219" resizable="false" text="Durée" />
-                                      <TableColumn fx:id="genreColCatalogTableView" editable="false" maxWidth="496.7999572753906" prefWidth="138.40008544921875" text="Genre" />
-                                      <TableColumn fx:id="artistColCatalogTableView" editable="false" prefWidth="158.39987182617188" text="Artiste" />
-                                      <TableColumn fx:id="albumColCatalogTableView" editable="false" prefWidth="152.0" text="Album" />
-                                      <TableColumn fx:id="playlistColCatalogTableView" editable="false" prefWidth="142.4000244140625" text="Playlist" />
-                                  </columns>
-                                  <columnResizePolicy>
-                                      <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                                  </columnResizePolicy>
-                           <contextMenu>
-                              <ContextMenu fx:id="CatalogContextMenu">
-                                <items>
-                                    <MenuItem fx:id="deleteTrackMenu" mnemonicParsing="false" onAction="#deleteTrackEvent" text="Supprimer" />
-                                    <MenuItem fx:id="modifyTrackMenu" mnemonicParsing="false" onAction="#ModifyTrackEvent" text="Modifier" />
-                                    <SeparatorMenuItem mnemonicParsing="false" />
-                                  <MenuItem fx:id="AddListenedTrackListMenu" disable="true" mnemonicParsing="false" onAction="#AddTrackWaitingListEvent" text="Ajouter à la liste d'écoute" />
-                                </items>
-                              </ContextMenu>
-                           </contextMenu>
-                              </TableView>
-                          </children>
-                      </HBox>
-                      <HBox alignment="TOP_CENTER" prefHeight="78.0" prefWidth="858.0" />
-                  <Button fx:id="addTrackBtn" defaultButton="true" mnemonicParsing="false" onAction="#addTrackEvent" text="Ajouter une piste">
-                     <VBox.margin>
-                        <Insets top="10.0" />
-                     </VBox.margin>
-                  </Button>
-                      <VBox alignment="CENTER" disable="true" prefHeight="195.0" prefWidth="858.0">
-                          <VBox.margin>
-                              <Insets bottom="50.0" top="50.0" />
-                          </VBox.margin>
-                      </VBox>
-                      <HBox prefHeight="100.0" prefWidth="200.0">
-                          <VBox.margin>
-                              <Insets top="50.0" />
-                          </VBox.margin>
-                      </HBox>
-                  </children>
-              </VBox>
-            <VBox alignment="CENTER">
+<BorderPane fx:id="catalogWindow" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eafc.peruwelz.playerproject.ctrl.CatalogController">
+   <center>
+      <VBox alignment="CENTER" BorderPane.alignment="CENTER">
+         <children>
+            <FlowPane alignment="TOP_CENTER" prefHeight="568.0" prefWidth="1304.0" rowValignment="TOP">
                <children>
-                  <Button fx:id="addCatalogWaitingListBtn" mnemonicParsing="false" onAction="#addCatalogWaitingListEvent" text="&gt;&gt;">
-                     <font>
-                        <Font name="System Bold" size="14.0" />
-                     </font>
-                  </Button>
-               </children>
-            </VBox>
-            <VBox>
-               <HBox.margin>
-                  <Insets />
-               </HBox.margin>
-               <children>
-                  <HBox prefHeight="70.0" prefWidth="374.0">
+                    <VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="488.0" prefWidth="876.0">
+                        <children>
+                            <HBox alignment="CENTER" prefHeight="600.0" prefWidth="900.0">
+                                <children>
+                                    <TableView fx:id="catalogTableView" editable="true" minHeight="-Infinity">
+                                        <columns>
+                                            <TableColumn fx:id="titleColCatalogTableView" editable="false" maxWidth="500.0" minWidth="200.0" prefWidth="207.9999801516533" text="Titre" />
+                                            <TableColumn fx:id="timeColCatalogTableView" editable="false" prefWidth="59.19999694824219" resizable="false" text="Durée" />
+                                            <TableColumn fx:id="genreColCatalogTableView" editable="false" maxWidth="496.7999572753906" prefWidth="138.40008544921875" text="Genre" />
+                                            <TableColumn fx:id="artistColCatalogTableView" editable="false" prefWidth="158.39987182617188" text="Artiste" />
+                                            <TableColumn fx:id="albumColCatalogTableView" editable="false" prefWidth="152.0" text="Album" />
+                                            <TableColumn fx:id="playlistColCatalogTableView" editable="false" prefWidth="142.4000244140625" text="Playlist" />
+                                        </columns>
+                                        <columnResizePolicy>
+                                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                        </columnResizePolicy>
+                                 <contextMenu>
+                                    <ContextMenu fx:id="CatalogContextMenu">
+                                      <items>
+                                          <MenuItem fx:id="deleteTrackMenu" mnemonicParsing="false" onAction="#deleteTrackEvent" text="Supprimer" />
+                                          <MenuItem fx:id="modifyTrackMenu" mnemonicParsing="false" onAction="#ModifyTrackEvent" text="Modifier" />
+                                          <SeparatorMenuItem mnemonicParsing="false" />
+                                        <MenuItem fx:id="AddListenedTrackListMenu" disable="true" mnemonicParsing="false" onAction="#AddTrackWaitingListEvent" text="Ajouter à la liste d'écoute" />
+                                      </items>
+                                    </ContextMenu>
+                                 </contextMenu>
+                                    </TableView>
+                                </children>
+                           <padding>
+                              <Insets top="40.0" />
+                           </padding>
+                            </HBox>
+                        <HBox alignment="CENTER">
+                           <children>
+                              <Button fx:id="addTrackBtn" defaultButton="true" mnemonicParsing="false" onAction="#addTrackEvent" prefWidth="150.0" text="Ajouter une piste">
+                                 <HBox.margin>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </HBox.margin>
+                              </Button>
+                              <Button fx:id="addWaitingListBtn" defaultButton="true" mnemonicParsing="false" onAction="#AddTrackWaitingListEvent" prefWidth="150.0" text="Ajouter à la liste d'écoute">
+                                 <HBox.margin>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </HBox.margin>
+                              </Button>
+                           </children>
+                           <padding>
+                              <Insets top="10.0" />
+                           </padding>
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                        </HBox>
+                        </children>
+                     <FlowPane.margin>
+                        <Insets bottom="30.0" />
+                     </FlowPane.margin>
+                    </VBox>
+                  <VBox alignment="TOP_CENTER" prefHeight="510.0" prefWidth="374.0">
                      <children>
-                        <ComboBox fx:id="addPlaylistComboBox" disable="true" editable="true" onMouseClicked="#SetupPlaylistComboBoxEvent" prefWidth="150.0">
-                           <HBox.margin>
-                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                           </HBox.margin>
-                        </ComboBox>
-                        <Button fx:id="addPlaylistBtn" disable="true" mnemonicParsing="false" onAction="#addPlaylistEvent" text="Ajouter">
-                           <HBox.margin>
-                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                           </HBox.margin>
-                        </Button>
+                          <VBox fx:id="listenZone" prefHeight="446.0" prefWidth="374.0">
+                              <children>
+                                    <Label text="Liste d'écoute">
+                                        <font>
+                                            <Font name="Calibri" size="18.0" />
+                                        </font>
+                                    </Label>
+                                      <ListView fx:id="waitingTrackListView" onMouseClicked="#selectWaitingTrackList">
+                                 <contextMenu>
+                                    <ContextMenu fx:id="WaitingContextMenu">
+                                      <items>
+                                        <MenuItem fx:id="deleteWaitingTrackMenu" mnemonicParsing="false" onAction="#deleteWaitingTrackEvent" text="Supprimer de la liste" />
+                                          <MenuItem fx:id="upWaitingMenu" mnemonicParsing="false" onAction="#upWaitingEvent" text="Monter" />
+                                          <MenuItem fx:id="downWaitingMenu" mnemonicParsing="false" onAction="#downWaitingEvent" text="Descendre" />
+                                          <MenuItem fx:id="emptyWaitingMenu" mnemonicParsing="false" onAction="#emptyWaitingEvent" text="Vider la liste" />
+                                      </items>
+                                    </ContextMenu>
+                                 </contextMenu>
+                              </ListView>
+                              </children>
+                              <padding>
+                                  <Insets left="20.0" right="20.0" />
+                              </padding>
+                          </VBox>
+                        <HBox alignment="BOTTOM_CENTER" prefHeight="70.0" prefWidth="374.0">
+                           <children>
+                              <ComboBox fx:id="addPlaylistComboBox" disable="true" editable="true" onMouseClicked="#SetupPlaylistComboBoxEvent" prefWidth="150.0">
+                                 <HBox.margin>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </HBox.margin>
+                              </ComboBox>
+                              <Button fx:id="addPlaylistBtn" disable="true" mnemonicParsing="false" onAction="#addPlaylistEvent" text="Ajouter">
+                                 <HBox.margin>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </HBox.margin>
+                              </Button>
+                           </children>
+                           <padding>
+                              <Insets left="10.0" />
+                           </padding>
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
+                        </HBox>
                      </children>
                      <padding>
-                        <Insets left="10.0" top="20.0" />
+                        <Insets top="30.0" />
                      </padding>
-                  </HBox>
-                    <VBox fx:id="listenZone" prefHeight="603.0" prefWidth="374.0">
-                        <children>
-                              <Label text="Liste d'écoute">
-                                  <font>
-                                      <Font name="Calibri" size="18.0" />
-                                  </font>
-                              </Label>
-                                <ListView fx:id="waitingTrackListView" onMouseClicked="#selectWaitingTrackList" prefHeight="595.0" prefWidth="337.0">
-                           <contextMenu>
-                              <ContextMenu fx:id="WaitingContextMenu">
-                                <items>
-                                  <MenuItem fx:id="deleteWaitingTrackMenu" mnemonicParsing="false" onAction="#deleteWaitingTrackEvent" text="Supprimer de la liste" />
-                                    <MenuItem fx:id="upWaitingMenu" mnemonicParsing="false" onAction="#upWaitingEvent" text="Monter" />
-                                    <MenuItem fx:id="downWaitingMenu" mnemonicParsing="false" onAction="#downWaitingEvent" text="Descendre" />
-                                    <MenuItem fx:id="emptyWaitingMenu" mnemonicParsing="false" onAction="#emptyWaitingEvent" text="Vider la liste" />
-                                </items>
-                              </ContextMenu>
-                           </contextMenu>
-                        </ListView>
-                        </children>
-                        <padding>
-                            <Insets left="20.0" right="20.0" top="20.0" />
-                        </padding>
-                    </VBox>
+                     <FlowPane.margin>
+                        <Insets bottom="20.0" />
+                     </FlowPane.margin>
+                  </VBox>
                </children>
-            </VBox>
-          </children>
-      </HBox>
-      <HBox fx:id="playZone" alignment="BOTTOM_CENTER" disable="true" prefHeight="70.0" prefWidth="1304.0">
+            </FlowPane>
+         </children>
+      </VBox>
+   </center>
+   <bottom>
+      <FlowPane fx:id="playZone" alignment="BASELINE_CENTER" columnHalignment="CENTER" disable="true" prefWidth="1304.0">
          <children>
-                    <HBox alignment="BOTTOM_CENTER">
+                    <HBox alignment="BOTTOM_CENTER" prefWidth="318.0">
                         <children>
                             <Button fx:id="previousBtn" maxHeight="30.0" maxWidth="30.0" mnemonicParsing="false" onAction="#PreviousEvent" prefHeight="24.0" prefWidth="20.0">
                                 <graphic>
@@ -237,13 +220,13 @@
                                 </HBox.margin>
                             </Button>
                         </children>
-               <HBox.margin>
-                  <Insets right="30.0" />
-               </HBox.margin>
+               <padding>
+                  <Insets top="15.0" />
+               </padding>
                     </HBox>
-                  <VBox alignment="CENTER" prefHeight="195.0" prefWidth="534.0">
+                  <VBox alignment="CENTER">
                       <children>
-                            <Label fx:id="titleLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="494.0">
+                            <Label fx:id="titleLabel" alignment="CENTER" contentDisplay="CENTER" prefWidth="494.0">
                                 <font>
                                     <Font size="18.0" />
                                 </font>
@@ -251,40 +234,104 @@
                           <VBox alignment="CENTER">
                               <children>
                                   <Label fx:id="currentTime" alignment="CENTER" contentDisplay="CENTER" text="00:00 / 00:00" />
-                                  <Slider fx:id="seekSlider" onMouseDragged="#handleSliderChange" onMousePressed="#handleSliderChange" prefHeight="14.0" prefWidth="457.0" showTickMarks="true" />
+                                  <Slider fx:id="seekSlider" onMouseDragged="#handleSliderChange" onMousePressed="#handleSliderChange" prefHeight="14.0" prefWidth="457.0" showTickMarks="true">
+                           <VBox.margin>
+                              <Insets bottom="10.0" />
+                           </VBox.margin>
+                        </Slider>
                               </children>
                           </VBox>
                       </children>
+               <padding>
+                  <Insets left="40.0" right="40.0" top="15.0" />
+               </padding>
+               <FlowPane.margin>
+                  <Insets />
+               </FlowPane.margin>
                   </VBox>
-            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+            <HBox>
                <children>
-                          <ImageView fx:id="pictureTrack" fitHeight="69.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true" smooth="false">
-                              <image>
-                                  <Image url="@../images/vide.png" />
-                              </image>
-                     <HBox.margin>
-                        <Insets />
-                     </HBox.margin>
-                          </ImageView>
+                  <HBox alignment="BOTTOM_CENTER">
+                     <children>
+                                <ImageView fx:id="pictureTrack" fitHeight="69.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true" smooth="false">
+                                    <image>
+                                        <Image url="@../images/vide.png" />
+                                    </image>
+                           <HBox.margin>
+                              <Insets left="30.0" right="30.0" />
+                           </HBox.margin>
+                                </ImageView>
+                     </children>
+                     <padding>
+                        <Insets top="15.0" />
+                     </padding>
+                  </HBox>
+                  <HBox alignment="BOTTOM_RIGHT">
+                     <children>
+                                <ImageView fx:id="volumePicture" fitHeight="28.0" fitWidth="25.0" onMouseClicked="#MuteVolumeChange" pickOnBounds="true" preserveRatio="true">
+                                    <image>
+                                        <Image url="@../images/volume.png" />
+                                    </image>
+                           <HBox.margin>
+                              <Insets bottom="5.0" />
+                           </HBox.margin>
+                                </ImageView>
+                                <Slider fx:id="volumeSlider" max="1.0" onMouseClicked="#VolumeSliderChange" onMouseDragged="#VolumeSliderChange" value="0.5">
+                           <HBox.margin>
+                              <Insets bottom="10.0" />
+                           </HBox.margin>
+                                </Slider>
+                     </children>
+                     <padding>
+                        <Insets bottom="10.0" />
+                     </padding>
+                  </HBox>
                </children>
+               <FlowPane.margin>
+                  <Insets right="50.0" />
+               </FlowPane.margin>
             </HBox>
-                    <ImageView fx:id="volumePicture" fitHeight="28.0" fitWidth="25.0" onMouseClicked="#MuteVolumeChange" pickOnBounds="true" preserveRatio="true">
-                        <image>
-                            <Image url="@../images/volume.png" />
-                        </image>
-                        <HBox.margin>
-                            <Insets bottom="5.0" right="5.0" />
-                        </HBox.margin>
-                    </ImageView>
-                    <Slider fx:id="volumeSlider" max="1.0" onMouseClicked="#VolumeSliderChange" onMouseDragged="#VolumeSliderChange" value="0.5">
-                        <HBox.margin>
-                            <Insets bottom="10.0" />
-                        </HBox.margin>
-                    </Slider>
          </children>
+         <BorderPane.margin>
+            <Insets />
+         </BorderPane.margin>
          <padding>
-            <Insets bottom="10.0" top="10.0" />
+            <Insets bottom="20.0" />
          </padding>
-      </HBox>
-   </children>
-</VBox>
+      </FlowPane>
+   </bottom>
+   <top>
+          <HBox alignment="BOTTOM_CENTER" prefHeight="66.0" prefWidth="858.0" BorderPane.alignment="BOTTOM_CENTER">
+              <padding>
+                  <Insets top="20.0" />
+              </padding>
+              <children>
+                  <TextField fx:id="searchField" promptText="Rechercher...">
+                      <HBox.margin>
+                          <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                      </HBox.margin>
+                  </TextField>
+                  <ComboBox fx:id="genreComboBox" onMouseClicked="#reloadGenreFilter" prefWidth="150.0" promptText="Genre">
+                      <HBox.margin>
+                          <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                      </HBox.margin>
+                  </ComboBox>
+                  <ComboBox fx:id="artistComboBox" onMouseClicked="#reloadArtistFilter" prefWidth="150.0" promptText="Artiste">
+                      <HBox.margin>
+                          <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                      </HBox.margin>
+                  </ComboBox>
+                  <ComboBox fx:id="albumComboBox" onMouseClicked="#reloadAlbumFilter" prefWidth="150.0" promptText="Album">
+                      <HBox.margin>
+                          <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                      </HBox.margin>
+                  </ComboBox>
+                  <ComboBox fx:id="playlistComboBox" onMouseClicked="#reloadPlaylistFilter" prefWidth="150.0" promptText="Playlist">
+                      <HBox.margin>
+                          <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                      </HBox.margin>
+                  </ComboBox>
+              </children>
+          </HBox>
+   </top>
+</BorderPane>

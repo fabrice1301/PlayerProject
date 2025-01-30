@@ -1,10 +1,9 @@
 package eafc.peruwelz.playerproject.ctrl;
 
 import eafc.peruwelz.playerproject.Class.AlertClass;
+import eafc.peruwelz.playerproject.Class.Catalog;
 import eafc.peruwelz.playerproject.Class.Filter;
 import eafc.peruwelz.playerproject.domain.*;
-
-import eafc.peruwelz.playerproject.Class.Catalog;
 import eafc.peruwelz.playerproject.modelControl.AlbumModelSelection;
 import eafc.peruwelz.playerproject.modelControl.ArtistModelSelection;
 import eafc.peruwelz.playerproject.modelControl.GenreModelSelection;
@@ -16,7 +15,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -27,146 +25,320 @@ import javafx.scene.input.KeyCode;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.tritonus.share.sampled.file.TAudioFileFormat;
-
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
-
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.*;
 
+/**
+ * Controlleur pour la gestion des pistes dans le catalogue musical.
+ * Il permet d'ajouter, modifier, supprimer des pistes, ainsi que d'interagir
+ * avec les genres, artistes, albums et playlists associés.
+ */
 @Controller
 public class TrackController {
-
-    @Autowired
-    private ApplicationContext context;
-    private CatalogController catalogController;
-    private TTrack track;
+    /**
+     * Piste à modifier dans l'interface.
+     */
     private TTrack trackToModify;
-    private TGenre genre;
-    private TArtist artist;
-    private TPlaylist playlist;
-    private TAlbum album;
-    private final TrackService trackService;
-    private GenreService genreService;
-    private ArtistService artistService;
-    private PlaylistService playlistService;
-    private AlbumService albumService;
-    private final Catalog catalog;
-    private File file;
-    private File picture;
-    private String trackPathPicture;
-    private Boolean update=false;
 
+    /**
+     * Genre associé à la piste.
+     */
+    private TGenre genre;
+
+    /**
+     * Artiste associé à la piste.
+     */
+    private TArtist artist;
+
+    /**
+     * Playlist associée à la piste.
+     */
+    private TPlaylist playlist;
+
+    /**
+     * Album associé à la piste.
+     */
+    private TAlbum album;
+
+    /**
+     * Service pour gérer les pistes.
+     */
+    private final TrackService trackService;
+
+    /**
+     * Service pour gérer les genres.
+     */
+    private GenreService genreService;
+
+    /**
+     * Service pour gérer les artistes.
+     */
+    private ArtistService artistService;
+
+    /**
+     * Service pour gérer les playlists.
+     */
+    private PlaylistService playlistService;
+
+    /**
+     * Service pour gérer les albums.
+     */
+    private AlbumService albumService;
+
+    /**
+     * Catalogue des éléments musicaux.
+     */
+    private final Catalog catalog;
+
+    /**
+     * Fichier de la piste.
+     */
+    private File file;
+
+    /**
+     * Fichier de l'image associée à la piste.
+     */
+    private File picture;
+
+    /**
+     * Chemin de l'image de la piste.
+     */
+    private String trackPathPicture;
+
+    /**
+     * Indicateur si la piste est en mode de mise à jour.
+     */
+    private Boolean update = false;
+
+    /**
+     * Contrôleur du catalogue pour gérer les interactions avec le catalogue principal.
+     */
+    private final CatalogController catalogController;
+
+    /**
+     * Sélecteur de date pour la piste.
+     */
     @FXML
     private DatePicker dateTrack;
 
+    /**
+     * Bouton pour sauvegarder la piste.
+     */
     @FXML
     private Button saveTrackBtn;
 
+    /**
+     * Bouton pour annuler l'opération en cours.
+     */
     @FXML
     private Button cancelBtn;
 
+    /**
+     * Bouton pour rechercher une piste.
+     */
     @FXML
     private Button searchTrackBtn;
 
+    /**
+     * Bouton pour rechercher une image de piste.
+     */
     @FXML
     private Button searchPictureTrackBtn;
 
+    /**
+     * Bouton pour ajouter un genre.
+     */
     @FXML
     private Button addGenreBtn;
 
+    /**
+     * Bouton pour ajouter un album.
+     */
     @FXML
     private Button addAlbumBtn;
 
+    /**
+     * Bouton pour ajouter un artiste.
+     */
     @FXML
     private Button addArtistBtn;
 
+    /**
+     * Bouton pour ajouter une playlist.
+     */
     @FXML
     private Button addPlaylistBtn;
 
+    /**
+     * Bouton pour supprimer une image associée à la piste.
+     */
     @FXML
     private Button trashPictureBtn;
 
+    /**
+     * Champ de texte pour le chemin du fichier de la piste.
+     */
     @FXML
     private TextField trackPathField;
 
+    /**
+     * Champ de texte pour le titre de la piste.
+     */
     @FXML
     private TextField trackTitleField;
 
+    /**
+     * Champ de texte pour le chemin de l'image associée à la piste.
+     */
     @FXML
     private TextField trackPathPictureField;
 
+    /**
+     * Image affichant la pochette de la piste.
+     */
     @FXML
     private ImageView trackPicture;
 
+    /**
+     * Champ de texte pour le nom du genre.
+     */
     @FXML
     private TextField genreNameField;
 
+    /**
+     * Champ de texte pour le nom de l'artiste.
+     */
     @FXML
     private TextField artistNameField;
 
+    /**
+     * Champ de texte pour le nom de la playlist.
+     */
     @FXML
     private TextField playlistNameField;
 
+    /**
+     * Champ de texte pour le nom de l'album.
+     */
     @FXML
     private TextField albumNameField;
 
+    /**
+     * TableView contenant la liste des genres disponibles.
+     */
     @FXML
     private TableView<GenreModelSelection> genreTableView;
 
+    /**
+     * Liste observable contenant les données des genres.
+     */
     @FXML
     private ObservableList<GenreModelSelection> dataGenreTable;
 
+    /**
+     * Colonne indiquant si un genre est sélectionné.
+     */
     @FXML
     private TableColumn<GenreModelSelection, Boolean> selectedGenreCol;
 
+    /**
+     * Colonne affichant le nom du genre.
+     */
     @FXML
     private TableColumn<GenreModelSelection, String> genreNameCol;
 
+    /**
+     * TableView contenant la liste des artistes disponibles.
+     */
     @FXML
     private TableView<ArtistModelSelection> artistTableView;
 
+    /**
+     * Liste observable contenant les données des artistes.
+     */
     @FXML
     private ObservableList<ArtistModelSelection> dataArtistTable;
 
+    /**
+     * TableView contenant la liste des playlists disponibles.
+     */
     @FXML
     private TableView<PlaylistModelSelection> playlistTableView;
 
+    /**
+     * Liste observable contenant les données des albums.
+     */
     @FXML
     private ObservableList<AlbumModelSelection> dataAlbumTable;
 
+    /**
+     * TableView contenant la liste des albums disponibles.
+     */
     @FXML
     private TableView<AlbumModelSelection> albumTableView;
 
+    /**
+     * Liste observable contenant les données des playlists.
+     */
     @FXML
     private ObservableList<PlaylistModelSelection> dataPlaylistTable;
 
+    /**
+     * Colonne indiquant si un artiste est sélectionné.
+     */
     @FXML
     private TableColumn<ArtistModelSelection, Boolean> selectedArtistCol;
 
+    /**
+     * Colonne affichant le nom de l'artiste.
+     */
     @FXML
     private TableColumn<ArtistModelSelection, String> artistNameCol;
 
+    /**
+     * Colonne indiquant si une playlist est sélectionnée.
+     */
     @FXML
     private TableColumn<PlaylistModelSelection, Boolean> selectedPlaylistCol;
 
+    /**
+     * Colonne affichant le nom de la playlist.
+     */
     @FXML
     private TableColumn<PlaylistModelSelection, String> playlistNameCol;
 
+    /**
+     * Colonne indiquant si un album est sélectionné.
+     */
     @FXML
-    private TableColumn<ArtistModelSelection, Boolean> selectedAlbumCol;
+    private TableColumn<AlbumModelSelection, Boolean> selectedAlbumCol;
 
+    /**
+     * Colonne affichant le nom de l'album.
+     */
     @FXML
     private TableColumn<AlbumModelSelection, String> albumNameCol;
 
+
+    /**
+     * Constructeur de la classe TrackController.
+     *
+     * @param trackService Service pour la gestion des pistes.
+     * @param genreService Service pour la gestion des genres.
+     * @param artistService Service pour la gestion des artistes.
+     * @param playlistService Service pour la gestion des playlists.
+     * @param albumService Service pour la gestion des albums.
+     * @param catalog Catalogue principal des éléments musicaux.
+     * @param catalogController Contrôleur principal du catalogue.
+     */
     @Autowired
-    public TrackController(TrackService trackService, GenreService genreService, ArtistService artistService, PlaylistService playlistService, AlbumService albumService, CatalogController catalogController, Catalog catalog){
+    public TrackController(TrackService trackService, GenreService genreService, ArtistService artistService, PlaylistService playlistService, AlbumService albumService, Catalog catalog, CatalogController catalogController) {
         this.genreService=genreService;
         this.artistService=artistService;
         this.playlistService=playlistService;
@@ -176,22 +348,28 @@ public class TrackController {
         this.trackService=trackService;
     }
 
+    /**
+     * Initialisation des composants et des validations dans l'interface.
+     */
     @FXML
     private void initialize(){
+        this.update = false;
         StringValidation stringValidation =
                 new StringValidation("max. 255 caractères",true);
+
         stringValidation
                 .setMaxLength(255)
                 .setRegularExp(".*");
         ValidationManager.getInstance().setValidation(trackTitleField,stringValidation);
-        ValidationManager.getInstance().setValidation(trackPathField,stringValidation);
+
         StringValidation stringValidation2 =
-                new StringValidation("max. 255 caractères",false);
-        stringValidation
+                new StringValidation("Obligatoire", true);
+        stringValidation2
                 .setMaxLength(255)
                 .setRegularExp(".*");
-        ValidationManager.getInstance().setValidation(trackPathPictureField,stringValidation2);
-        ValidationManager.getInstance().setSubmitButton(saveTrackBtn,trackTitleField,trackPathField,trackPathPictureField);
+        ValidationManager.getInstance().setValidation(trackPathField, stringValidation2);
+
+        ValidationManager.getInstance().setSubmitButton(saveTrackBtn, trackTitleField, trackPathField);
 
         StringValidation stringValidation3 =
                 new StringValidation("max. 50 caractères",false);
@@ -206,15 +384,12 @@ public class TrackController {
         ValidationManager.getInstance().setSubmitButton(addAlbumBtn,albumNameField);
         ValidationManager.getInstance().setSubmitButton(addArtistBtn,artistNameField);
         ValidationManager.getInstance().setSubmitButton(addPlaylistBtn,playlistNameField);
-
-
         trackToModify=new TTrack();
         //Ajoute la loupe dans les boutons de recherche
         searchTrackBtn.setText("\uD83D\uDD0D");
         searchPictureTrackBtn.setText("\uD83D\uDD0D");
         trashPictureBtn.setText("\uD83D\uDDD1");
         this.trackPathPicture=null;
-
         //Gestion des artistes
         this.selectedArtistCol.setCellValueFactory(new PropertyValueFactory<>("selected"));
         this.selectedArtistCol.setCellFactory(tc -> new CheckBoxTableCell<>());
@@ -244,19 +419,18 @@ public class TrackController {
                 int index=artistTableView.getSelectionModel().getSelectedIndex();
                 TArtist deletedArtist = artistTableView.getSelectionModel().getSelectedItem().getArtist();
                 if (selectedItem != null && trackService.findByArtistService(deletedArtist).isEmpty()) {
-                    if ( AlertClass.showConfirmationDeleteDialog("cet article")){
+                    if (AlertClass.showConfirmationDeleteDialog("cet artiste")) {
                         dataArtistTable.remove(index);
                         artistService.deleteArtistService(deletedArtist);
                         artistTableView.getSelectionModel().clearSelection();
                         artistTableView.refresh();
                     }
                 }else{
-                    AlertClass.showInformationDeleteDialog("cet article");
+                    AlertClass.showInformationDeleteDialog("cet artiste");
                     System.out.println("Alerte");
                 }
             }
         });
-
 
         // Gestion des genres
         this.selectedGenreCol.setCellValueFactory(new PropertyValueFactory<>("selected"));
@@ -385,10 +559,16 @@ public class TrackController {
         });
     }
 
-
-    public void setTrackToModify(TTrack track, Boolean update){
+    /**
+     * Définit la piste à modifier dans l'interface.
+     * Cette méthode est utilisée pour pré-remplir les champs de l'interface utilisateur avec les informations
+     * de la piste à modifier.
+     *
+     * @param track La piste à modifier.
+     */
+    public void setTrackToModify(TTrack track) {
         if (track != null){
-            this.update=update;
+            this.update = true;
             this.trackToModify=track;
             trackPathField.setText(this.trackToModify.getTrackPath());
             trackTitleField.setText(this.trackToModify.getTrackTitle());
@@ -396,9 +576,20 @@ public class TrackController {
             if (trackToModify.getTrackPicture()==null){
                 trackPicture.setImage(new Image(getClass().getResource("/images/vide.jpg").toExternalForm()));}
             else {
-                trackPicture.setImage(new Image(trackToModify.getTrackPicture()));
-            }
 
+                File file = new File(this.trackToModify.getTrackPicture());
+                if (file.exists() && file.isFile()) {
+                    try {
+                        trackPicture.setImage(new Image(file.toURI().toString()));
+                        trackPathPictureField.setText(trackToModify.getTrackPicture());
+
+                        trackPathPicture = trackToModify.getTrackPicture();
+                    } catch (Exception e) {
+                        trackPicture.setImage(new Image(getClass().getResource("/images/vide.jpg").toExternalForm()));
+                    }
+                }
+
+            }
 
             Set<TGenre> listGenre=this.trackToModify.getTrackGenreList();
             for (GenreModelSelection genre : dataGenreTable){
@@ -422,12 +613,14 @@ public class TrackController {
         }
     }
 
+    /**
+     * Ouvre une boîte de dialogue pour rechercher et sélectionner un fichier MP3.
+     * Cette méthode est utilisée pour permettre à l'utilisateur de sélectionner un fichier MP3 à ajouter à la piste.
+     */
     @FXML
     private void searchTrackEvent() {
-
         // Créer un FileChooser
         FileChooser fileChooser = new FileChooser();
-
         // Configurer les filtres pour les fichiers MP3 uniquement
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Fichiers MP3 (*.mp3)", "*.mp3");
         fileChooser.getExtensionFilters().add(extFilter);
@@ -440,29 +633,35 @@ public class TrackController {
             trackPathField.setText(this.file.getName());
             trackTitleField.setText(extensionLess(this.file.getName()));
         }
+
     }
 
+    /**
+     * Sauvegarde les informations d'une piste, qu'elle soit nouvelle ou modifiée.
+     * Cette méthode récupère toutes les informations sur la piste, y compris le titre, le chemin, les genres, artistes, albums,
+     * playlists, et sauvegarde ces informations dans le service de piste ainsi que dans le catalogue.
+     *
+     * @throws UnsupportedAudioFileException Si le fichier audio n'est pas supporté.
+     * @throws IOException Si une erreur d'entrée/sortie se produit.
+     */
     @FXML
     private void saveTrackEvent() throws UnsupportedAudioFileException, IOException {
-        track=new TTrack();
+        TTrack track = new TTrack();
         if (this.update) {
-            track=this.trackToModify;
+            track = this.trackToModify;
         }
-
         //On vérifie qu'un titre a été renseigné
         if (Objects.equals(trackTitleField.getText(), "")) {
             //On récupère le nom du fichier sans l'extension
-            this.track.setTrackTitle(extensionLess(this.file.getName()));
+            track.setTrackTitle(extensionLess(this.file.getName()));
         }
         else{
-            this.track.setTrackTitle(this.trackTitleField.getText());
+            track.setTrackTitle(this.trackTitleField.getText());
         }
-
         //On récupère le chemin du fichier
-
-        this.track.setTrackPath(trackPathField.getText());
+        track.setTrackPath(trackPathField.getText());
         if (this.file!=null) {
-            this.track.setTrackPath(file.getAbsolutePath());
+            track.setTrackPath(file.getAbsolutePath());
             AudioFileFormat formatFile = AudioSystem.getAudioFileFormat(file);
             if (formatFile instanceof TAudioFileFormat) {
                 // Récupérer les propriétés du fichier
@@ -471,11 +670,10 @@ public class TrackController {
                 Long timeMicroSecondes = (Long) propriete.get("duration");
                 // Convertir la durée en secondes
                 int time = (int) (timeMicroSecondes / 1000000);
-                this.track.setTrackTime(time);
+                track.setTrackTime(time);
             }
             this.file=null;
         }
-
         //On récupère les genres sélectionnés
         Set<TGenre> genreSelected = new HashSet<>();
         dataGenreTable.forEach(hsl -> {if (hsl.isSelected()) genreSelected.add(hsl.getGenre());});
@@ -497,126 +695,201 @@ public class TrackController {
         track.setTrackAlbumList(albumSelected);
 
         //On récupère l'adresse de la pochette si elle existe
-        if (this.trackPathPicture!=null) track.setTrackPicture(this.trackPathPicture);
-        else {track.setTrackPicture(null);}
+        if (this.trackPathPicture != null) {
+            track.setTrackPicture(trackPathPictureField.getText());
+        } else {
+            track.setTrackPicture(null);
+        }
 
         if (this.dateTrack!=null) track.setTrackDate(this.dateTrack.getValue());
 
         //On sauve la piste avec ses propriétés
-        trackService.saveTrackService(this.track);
-
-        if (!this.update) this.catalog.addTrack(this.track);
-        else this.catalog.modifyTrack(this.catalog.getIndex(track),track);
+        trackService.saveTrackService(track);
+        if (!this.update) this.catalog.addTrack(track);
+        else {
+            this.catalog.modifyTrack(this.catalog.getIndex(track), track);
+            this.catalogController.updateTrackWaitingList(track);
+        }
         this.catalog.sortCatalog();
         CancelEvent();
     }
 
-
+    /**
+     * Retire l'extension du nom de fichier.
+     * Cette méthode supprime l'extension d'un nom de fichier pour obtenir le nom sans l'extension.
+     *
+     * @param name Le nom du fichier avec l'extension.
+     * @return Le nom du fichier sans extension.
+     */
     private String extensionLess(String name){
+        if (name != null) {
+            // Trouver la dernière position du point
+            int position = name.lastIndexOf(".");
 
-        // Trouver la dernière position du point
-        int position = name.lastIndexOf(".");
+            // Retirer l'extension (tout après le dernier point)
+            name = name.substring(0, position);
+        }
 
-        // Retirer l'extension (tout après le dernier point)
-        name = name.substring(0, position);
         return name;
     }
 
+    /**
+     * Ferme la fenêtre en cours lorsqu'un utilisateur clique sur le bouton d'annulation.
+     * Cette méthode est utilisée pour fermer la fenêtre sans effectuer de modifications.
+     */
     @FXML
     private void CancelEvent(){
         Stage stage = (Stage) cancelBtn.getScene().getWindow();
         stage.close();
     }
 
+    /**
+     * Ajoute un genre à la liste des genres disponibles.
+     * Cette méthode est utilisée pour ajouter un nouveau genre à la base de données et le mettre à jour dans l'interface utilisateur.
+     * Si le genre existe déjà, un message d'erreur est affiché.
+     */
     @FXML
     private void AddGenreEvent(){
         if (!genreNameField.getText().isEmpty() && genreNameField.getText().trim()!="") {
-            genre = new TGenre();
-            genre.setGenreName(genreNameField.getText());
-            genreService.saveGenreService(genre);
-            List<TGenre> list=genreService.findAllGenreService();
-            this.dataGenreTable.clear();
-            for (TGenre genre:list){
-                dataGenreTable.add(new GenreModelSelection(genre,false));
+            if (genreService.isExists(genreNameField.getText())) {
+                AlertClass.messageError("Le genre existe déjà !");
+            } else {
+                genre = new TGenre();
+                genre.setGenreName(genreNameField.getText());
+                genreService.saveGenreService(genre);
+                List<TGenre> list = genreService.findAllGenreService();
+                this.dataGenreTable.clear();
+                for (TGenre genre : list) {
+                    dataGenreTable.add(new GenreModelSelection(genre, false));
+                }
+                genreTableView.refresh();
+                genreNameField.setText("");
+                //Si nous sommes sur la modification d'une track et non sur un ajout
+                if (this.update) {
+                    Set<TGenre> listGenre = this.trackToModify.getTrackGenreList();
+                    if (listGenre != null) {
+                        for (GenreModelSelection genre : dataGenreTable) {
+                            genre.setSelected(listGenre.contains(genre.getGenre()));
+                        }
+                    }
+
+                }
             }
-            genreTableView.refresh();
-            genreNameField.setText("");
-            //Si nous sommes la modification d'une track et non sur un ajout
-            if (this.update) {
-                Set<TGenre> listGenre = this.trackToModify.getTrackGenreList();
-                for (GenreModelSelection genre : dataGenreTable) {
-                    genre.setSelected(listGenre.contains(genre.getGenre()));
+
+        }
+    }
+
+    /**
+     * Ajoute un artiste à la liste des artistes disponibles.
+     * Cette méthode permet d'ajouter un nouvel artiste et de mettre à jour l'interface utilisateur.
+     * Si l'artiste existe déjà, un message d'erreur est affiché.
+     */
+    @FXML
+    private void AddArtistEvent(){
+        if (!artistNameField.getText().isEmpty() && artistNameField.getText().trim()!="") {
+            if (artistService.isExists(artistNameField.getText())) {
+                AlertClass.messageError("L'artiste existe déjà !");
+            }
+            else {
+                artist = new TArtist();
+                artist.setArtistName(artistNameField.getText());
+                artistService.saveArtistService(artist);
+                List<TArtist> list = artistService.findAllArtistService();
+                dataArtistTable.clear();
+                for (TArtist artist : list) {
+                    dataArtistTable.add(new ArtistModelSelection(artist, false));
+                }
+                artistTableView.refresh();
+                artistNameField.setText("");
+                //Si nous sommes sur la modification d'une track et non sur un ajout
+                if (this.update) {
+                    Set<TArtist> listArtist = this.trackToModify.getTrackArtistList();
+                    if (listArtist != null) {
+                        for (ArtistModelSelection artist : dataArtistTable) {
+                            artist.setSelected(listArtist.contains(artist.getArtist()));
+                        }
+                    }
                 }
             }
         }
     }
 
-    @FXML
-    private void AddArtistEvent(){
-        if (!artistNameField.getText().isEmpty() && artistNameField.getText().trim()!=""){
-            artist=new TArtist();
-            artist.setArtistName(artistNameField.getText());
-            artistService.saveArtistService(artist);
-            List<TArtist> list=artistService.findAllArtistService();
-            dataArtistTable.clear();
-            for (TArtist artist:list){
-                dataArtistTable.add(new ArtistModelSelection(artist,false));
-            }
-            artistTableView.refresh();
-            artistNameField.setText("");
-            //Si nous sommes la modification d'une track et non sur un ajout
-            Set<TArtist> listArtist=this.trackToModify.getTrackArtistList();
-            for (ArtistModelSelection artist : dataArtistTable){
-                artist.setSelected(listArtist.contains(artist.getArtist()));
-            }
-
-        }
-    }
-
+    /**
+     * Ajoute une playlist à la liste des playlists disponibles.
+     * Cette méthode permet d'ajouter une nouvelle playlist et de mettre à jour l'interface utilisateur.
+     * Si la playlist existe déjà, un message d'erreur est affiché.
+     */
     @FXML
     private void AddPlaylistEvent(){
-        if (!playlistNameField.getText().isEmpty() && playlistNameField.getText().trim()!=""){
-            playlist=new TPlaylist();
-            playlist.setPlaylistName(playlistNameField.getText());
-            playlistService.savePlaylistService(playlist);
-            List<TPlaylist> list=playlistService.findAllPlaylistService();
-            dataPlaylistTable.clear();
-            for (TPlaylist playlist:list){
-                dataPlaylistTable.add(new PlaylistModelSelection(playlist,false));
+        if (!playlistNameField.getText().isEmpty() && playlistNameField.getText().trim()!="") {
+            if (playlistService.isExists(playlistNameField.getText())) {
+                AlertClass.messageError("La playlist existe déjà !");
             }
-            playlistTableView.refresh();
-            playlistNameField.setText("");
+            else {
+                playlist = new TPlaylist();
+                playlist.setPlaylistName(playlistNameField.getText());
+                playlistService.savePlaylistService(playlist);
+                List<TPlaylist> list = playlistService.findAllPlaylistService();
+                dataPlaylistTable.clear();
+                for (TPlaylist playlist : list) {
+                    dataPlaylistTable.add(new PlaylistModelSelection(playlist, false));
+                }
+                playlistTableView.refresh();
+                playlistNameField.setText("");
 
-            //Si nous sommes la modification d'une track et non sur un ajout
-            Set<TPlaylist> listPlaylist=this.trackToModify.getTrackPlaylistList();
-            for (PlaylistModelSelection playlist : dataPlaylistTable){
-                playlist.setSelected(listPlaylist.contains(playlist.getPlaylist()));
+                //Si nous sommes sur la modification d'une track et non sur un ajout
+                if (this.update) {
+                    Set<TPlaylist> listPlaylist = this.trackToModify.getTrackPlaylistList();
+                    if (listPlaylist != null) {
+                        for (PlaylistModelSelection playlist : dataPlaylistTable) {
+                            playlist.setSelected(listPlaylist.contains(playlist.getPlaylist()));
+                        }
+                    }
+                }
             }
         }
     }
 
+    /**
+     * Ajoute un album à la liste des albums disponibles.
+     * Cette méthode permet d'ajouter un nouvel album et de mettre à jour l'interface utilisateur.
+     * Si l'album existe déjà, un message d'erreur est affiché.
+     */
     @FXML
     private void AddAlbumEvent(){
-        if (!albumNameField.getText().isEmpty() && albumNameField.getText().trim()!=""){
-            album=new TAlbum();
-            album.setAlbumName(albumNameField.getText());
-            albumService.saveAlbumService(album);
-            List<TAlbum> list=albumService.findAllAlbumService();
-            dataAlbumTable.clear();
-            for (TAlbum album:list){
-                dataAlbumTable.add(new AlbumModelSelection(album,false));
+        if (!albumNameField.getText().isEmpty() && albumNameField.getText().trim()!="") {
+            if (albumService.isExists(albumNameField.getText())) {
+                AlertClass.messageError("L'album existe déjà !");
             }
-            albumTableView.refresh();
-            albumNameField.setText("");
+            else {
+                album = new TAlbum();
+                album.setAlbumName(albumNameField.getText());
+                albumService.saveAlbumService(album);
+                List<TAlbum> list = albumService.findAllAlbumService();
+                dataAlbumTable.clear();
+                for (TAlbum album : list) {
+                    dataAlbumTable.add(new AlbumModelSelection(album, false));
+                }
+                albumTableView.refresh();
+                albumNameField.setText("");
 
-            //Si nous sommes la modification d'une track et non sur un ajout
-            Set<TAlbum> listAlbum=this.trackToModify.getTrackAlbumList();
-            for (AlbumModelSelection album : dataAlbumTable){
-                album.setSelected(listAlbum.contains(album.getAlbum()));
+                //Si nous sommes sur la modification d'une track et non sur un ajout
+                if (this.update) {
+                    Set<TAlbum> listAlbum = this.trackToModify.getTrackAlbumList();
+                    if (listAlbum != null) {
+                        for (AlbumModelSelection album : dataAlbumTable) {
+                            album.setSelected(listAlbum.contains(album.getAlbum()));
+                        }
+                    }
+                }
             }
         }
     }
 
+    /**
+     * Ouvre une boîte de dialogue pour rechercher et sélectionner une image pour la pochette de la piste.
+     * L'image sélectionnée est ensuite affichée dans l'interface utilisateur.
+     */
     @FXML
     private void searchPictureTrackEvent(){
         // Créer un FileChooser
@@ -631,39 +904,23 @@ public class TrackController {
 
         // Si un fichier est sélectionné, mettre à jour l'interface
         if (this.picture != null) {
-            this.trackPathPictureField.setText(this.picture.getName());
+            this.trackPathPictureField.setText(this.picture.getAbsolutePath());
             this.trackPathPicture=this.picture.toURI().toString();
             Image image = new Image(this.trackPathPicture);
             trackPicture.setImage(image);
         }
     }
 
-    public void setUpdate(Boolean update){
-        this.update=update;
+    /**
+     * Supprime la pochette de la piste et rétablit l'image par défaut.
+     * Cette méthode est utilisée pour réinitialiser l'image de la pochette d'une piste.
+     */
+    @FXML
+    private void TrashPictureEvent() {
+        String path = getClass().getResource("/images/vide.jpg").toExternalForm();
+        trackPathPictureField.setText("");
+        trackPicture.setImage(new Image(getClass().getResource("/images/vide.jpg").toExternalForm()));
     }
-
-    public static boolean AlertDeleteDialog() {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Confirmation de suppression");
-        alert.setHeaderText("Voulez-vous vraiment supprimer cet artiste ?");
-        Optional<ButtonType> result = alert.showAndWait();
-        return result.isPresent() && result.get() == ButtonType.OK;
-    }
-        @FXML
-        private void TrashPictureEvent(){
-            String path=getClass().getResource("/images/vide.jpg").toExternalForm();
-            trackPathPictureField.setText("");
-            trackPicture.setImage(new Image(getClass().getResource("/images/vide.jpg").toExternalForm()));
-            //trackToModify.setTrackPicture(path);
-        }
-
-        private void loadPictureTrack(String path) {
-            //trackPathPicture = getClass().getResource(path).toExternalForm();
-            //Image image=new Image(getClass().getResource(path).toExternalForm());
-            trackPicture.setImage(new Image(getClass().getResource(path).toExternalForm()));
-        }
-
-
 }
 
 

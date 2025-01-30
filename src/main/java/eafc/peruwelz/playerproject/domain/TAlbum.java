@@ -7,86 +7,97 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
-import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Set;
-
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-
+/**
+ * Représente un album musical.
+ */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 public class TAlbum {
 
+    /**
+     * Identifiant unique de l'album.
+     */
     @Id
     @Column(nullable = false, updatable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long albumId;
 
+    /**
+     * Nom de l'album.
+     */
     @Column
     private String albumName;
 
-    @Column
-    private String albumPicture;
-
-    @Column
-    private LocalDate albumDate;
-
-    @Column(columnDefinition = "tinyint", length = 1)
-    private Boolean albumDeleted=false;
-
+    /**
+     * Liste des pistes associées à cet album.
+     */
     @ManyToMany(mappedBy = "trackAlbumList")
     private Set<TTrack> albumTrackList;
 
-
+    /**
+     * Obtient l'identifiant de l'album.
+     *
+     * @return l'identifiant de l'album
+     */
     public Long getAlbumId() {
         return albumId;
     }
 
+    /**
+     * Définit l'identifiant de l'album.
+     *
+     * @param albumId l'identifiant de l'album
+     */
     public void setAlbumId(final Long albumId) {
         this.albumId = albumId;
     }
 
+    /**
+     * Obtient le nom de l'album.
+     *
+     * @return le nom de l'album
+     */
     public String getAlbumName() {
         return albumName;
     }
 
+    /**
+     * Définit le nom de l'album.
+     *
+     * @param albumName le nom de l'album
+     */
     public void setAlbumName(final String albumName) {
         this.albumName = albumName;
     }
 
-    public String getAlbumPicture() {
-        return albumPicture;
-    }
-
-    public void setAlbumPicture(final String albumPicture) {
-        this.albumPicture = albumPicture;
-    }
-
-    public LocalDate getAlbumDate() {
-        return albumDate;
-    }
-
-    public void setAlbumDate(final LocalDate albumDate) {
-        this.albumDate = albumDate;
-    }
-
-    public Boolean getAlbumDeleted() {
-        return albumDeleted;
-    }
-
-    public void setAlbumDeleted(final Boolean albumDeleted) {
-        this.albumDeleted = albumDeleted;
-    }
-
+    /**
+     * Obtient la liste des pistes de l'album.
+     *
+     * @return la liste des pistes de l'album
+     */
     public Set<TTrack> getAlbumTrackList() {
         return albumTrackList;
     }
 
+    /**
+     * Définit la liste des pistes de l'album.
+     *
+     * @param albumTrackList la liste des pistes de l'album
+     */
     public void setAlbumTrackList(final Set<TTrack> albumTrackList) {
         this.albumTrackList = albumTrackList;
     }
 
+    /**
+     * Vérifie l'égalité de l'album en se basant sur l'identifiant.
+     *
+     * @param o l'objet à comparer
+     * @return true si les albums sont égaux, false sinon
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -94,6 +105,11 @@ public class TAlbum {
         return Objects.equals(getAlbumId(), album.getAlbumId());
     }
 
+    /**
+     * Génère un code de hachage basé sur l'identifiant de l'album.
+     *
+     * @return le code de hachage de l'album
+     */
     @Override
     public int hashCode() {
         return Objects.hash(getAlbumId());

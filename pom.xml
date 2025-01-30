@@ -99,6 +99,20 @@
                     </profiles>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <!-- Désactiver les avertissements stricts -->
+                    <additionalJOptions>
+                        <arg>-Xdoclint:none</arg>
+                        <arg>-quiet</arg>
+                    </additionalJOptions>
+                    <source>${java.version}</source>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
